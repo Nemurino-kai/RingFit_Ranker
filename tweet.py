@@ -6,27 +6,28 @@ import config
 import time
 import urllib
 import ringfitter
+import operator
 
-# TwitterのAPI
+# TwitterのAPI_TOKEN
 CK = config.CONSUMER_KEY
 CS = config.CONSUMER_SECRET
 AT = config.ACCESS_TOKEN
 AS = config.ACCESS_TOKEN_SECRET
 
-### TwitterAPI認証用関数
+# TwitterAPI認証用関数
 def authTwitter():
   auth = tweepy.OAuthHandler(CK, CS)
   auth.set_access_token(AT, AS)
   api = tweepy.API(auth, wait_on_rate_limit = True) # API利用制限にかかった場合、解除まで待機する
   return(api)
 
+
+
 def tweet():
 
-    time.sleep(6)
     api = authTwitter()
-
     end_tweet_id = 0
-
+    exercise_data_list=[]
     # --------------------------------------------------------------
     ID_LIST = []
     first_time = True
@@ -78,10 +79,23 @@ def tweet():
                 if not ringfitter.isResultImage():continue
                 try:
                     # いいねする
-                    api.create_favorite(status.id)
+                    # api.create_favorite(status.id)
+
+                    # 画像から運動記録を読み取る
+                    exercise_data = ringfitter.ImageToData()
+
+                    # リストに運動記録を追加
+                    exercise_data_list.append(exercise_data)
+
+                    # リストを時間順でソート
+                    exercise_data_list = sorted(exercise_data_list, key=lambda e: e.exercise_time,reverse=True)
+
+                    # 運動時間の順位を計算する
+                    time_ranking = exercise_data_list.index(exercise_data)
 
                     tweet = "@" + str(status.user.screen_name) +'\n'
-                    tweet += ringfitter.ImageToText()
+                    tweet += str(exercise_data.exercise_time) + " いい汗かいたね！お疲れ様！\n"
+                    tweet += f"{time_ranking+1}位/{len(exercise_data_list)}人中"
                     api.update_status(status=tweet, in_reply_to_status_id=status.id)
                 except tweepy.error.TweepError:
                     import traceback
