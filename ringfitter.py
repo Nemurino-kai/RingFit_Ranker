@@ -10,16 +10,20 @@ from google.cloud.vision import types
 import os
 import re
 import datetime
+import numpy as np
+import seaborn as sns
 
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = './client_credentials.json'
 THRESHOLD=0.95
 TEMPLATE = cv2.imread('template.jpg')
 
 
+
 class ExerciseData:
-    def __init__(self, time,cal):
+    def __init__(self, time,cal,user_name):
         self.exercise_time = time
         self.exercise_cal = cal
+        self.user_name = user_name
 
 def readText(image):
     # Instantiates a client
@@ -42,19 +46,24 @@ def readTime(time_image):
         time_array.extend(match)
     print(time_array)
     #time型に変換
-    if(len(time_array)==1):
-        return datetime.time(second=int(time_array[0]))
-    if(len(time_array)==2):
-        return datetime.time(minute=int(time_array[0]),second=int(time_array[1]))
-    if(len(time_array)==3):
-        return datetime.time(hour=int(time_array[0]),minute=int(time_array[1]),second=int(time_array[2]))
+    try:
+        if(len(time_array)==1):
+            return datetime.time(second=int(time_array[0]))
+        if(len(time_array)==2):
+            return datetime.time(minute=int(time_array[0]),second=int(time_array[1]))
+        if(len(time_array)==3):
+            return datetime.time(hour=int(time_array[0]),minute=int(time_array[1]),second=int(time_array[2]))
+    except:
+        print("Can't Read Error")
+        # TODO: Error処理をきちんとする
+        return datetime.time(second=0)
 
 def readCal(cal_image):
     texts = readText(cal_image)
     for text in texts:
         print(text.description)
     # 小数付きでkcalを返す
-    return float(re.findall("\d+\.\d+",texts[0].description)[0])
+    return float(re.findall(r"[-+]?\d*\.\d+|\d+",texts[0].description)[0])
 
 def isResultImage():
     fetch_image = cv2.imread('temp.jpg')
@@ -66,7 +75,7 @@ def isResultImage():
     if(max_val > THRESHOLD):return True
     else: return False
 
-def ImageToData():
+def ImageToData(user_name):
     fetch_image = cv2.imread('temp.jpg')
 
     #各部分の画像を切り出す
@@ -76,4 +85,28 @@ def ImageToData():
 
     time = readTime(total_time)
     cal = readCal(total_cal)
-    return ExerciseData(time,cal)
+    return ExerciseData(time,cal,user_name)
+
+def CovertDatalistToTimelist(exercise_data_list):
+    return [e.exercise_time.hour+(e.exercise_time.minute/60.0)+(e.exercise_time.second/3600.0) for e in exercise_data_list]
+
+def CovertDatalistToCallist(exercise_data_list):
+    return [e.exercise_cal for e in exercise_data_list]
+
+def DataListToHistgram(exercise_list,ranking):
+    n, bins, patches = plt.hist(exercise_list,color= 'darkturquoise')
+    print(n, bins)
+    print(np.where(bins >= exercise_list[ranking])[0][0])
+    x = np.where(bins >= exercise_list[ranking])[0][0]
+    patches[x].set_facecolor('tomato')
+    plt.savefig('hist.jpg')  # ヒストグラムを保存
+
+num_list=[0,0,0,10,30,30,30,40,50,70,90,100]
+time_ranking = 4
+n, bins, patches = plt.hist(num_list,color= 'darkturquoise')
+print(n,bins)
+print(np.where(bins>=num_list[time_ranking])[0][0])
+x= np.where(bins>=num_list[time_ranking])[0][0]
+patches[x].set_facecolor('tomato')
+plt.savefig('hist.jpg')
+plt.show()
