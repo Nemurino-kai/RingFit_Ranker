@@ -39,6 +39,17 @@ def search_exercise_data(api,exercise_data_list,max_number=10):
             import traceback
             traceback.print_exc()
 
+# 運動記録のランキングをツイートする
+def tweet_ranking(api,exercise_data_list):
+    # リストを消費カロリー順でソート
+    exercise_data_list = sorted(exercise_data_list, key=lambda e: e.exercise_cal, reverse=True)
+    tweet = "今日のランキング発表！\n"
+    for i,exercise_data in enumerate(exercise_data_list):
+        tweet += f"{i+1}位 {exercise_data.user_name} {exercise_data.cal}kcal"
+        if i+1 >= 3:break
+    print(tweet)
+    api.update_with_media(status=tweet)
+
 # 運動結果の画像を取得出来たらtrue,できなかったらfalseを返す
 def fetch_image(status):
     # mediaがなければ飛ばす
@@ -77,7 +88,8 @@ def tweet():
             # データを更新する
             search_exercise_data(api, exercise_data_list)
             print("data updated")
-            # TODO:ランキングを呟く
+            # ランキングを呟く
+            tweet_ranking(api,exercise_data_list)
 
         # タイムラインを取得する
         public_tweets = api.home_timeline()
