@@ -16,6 +16,11 @@ THRESHOLD=0.95
 TEMPLATE = cv2.imread('template.jpg')
 
 
+class ExerciseData:
+    def __init__(self, time,cal):
+        self.exercise_time = time
+        self.exercise_cal = cal
+
 def readText(image):
     # Instantiates a client
     client = vision.ImageAnnotatorClient()
@@ -61,7 +66,7 @@ def isResultImage():
     if(max_val > THRESHOLD):return True
     else: return False
 
-def ImageToText():
+def ImageToData():
     fetch_image = cv2.imread('temp.jpg')
 
     #各部分の画像を切り出す
@@ -70,4 +75,5 @@ def ImageToText():
     total_distance = fetch_image[493:493+76,560:560+396]
 
     time = readTime(total_time)
-    return (str(time)+' 頑張ったね！お疲れ様！')
+    cal = readCal(total_cal)
+    return ExerciseData(time,cal)
