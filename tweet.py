@@ -25,13 +25,13 @@ def authTwitter():
   return(api)
 
 # 運動記録をツイッター上から検索し、データベースに追加する
-def search_exercise_data(api,exercise_data_list,max_number=10):
+def search_exercise_data(api,exercise_data_list,max_number=50):
     for tweet in tweepy.Cursor(api.search, q='#リングフィットアドベンチャー').items(10000):
         print(tweet.text)
         if not fetch_image(tweet): continue
         try:
             # 画像から運動記録を読み取る
-            exercise_data = ringfitter.ImageToData(tweet.user.screen_name)
+            exercise_data = ringfitter.ImageToData(tweet.user.name)
             # リストに運動記録を追加
             exercise_data_list.append(exercise_data)
             if len(exercise_data_list) >= max_number: return
@@ -45,10 +45,10 @@ def tweet_ranking(api,exercise_data_list):
     exercise_data_list = sorted(exercise_data_list, key=lambda e: e.exercise_cal, reverse=True)
     tweet = "今日のランキング発表！\n"
     for i,exercise_data in enumerate(exercise_data_list):
-        tweet += f"{i+1}位 {exercise_data.user_name} {exercise_data.cal}kcal"
+        tweet += f"{i+1}位 {exercise_data.user_name} {exercise_data.exercise_cal}kcal\n"
         if i+1 >= 3:break
     print(tweet)
-    api.update_with_media(status=tweet)
+    api.update_status(status=tweet)
 
 # 運動結果の画像を取得出来たらtrue,できなかったらfalseを返す
 def fetch_image(status):
@@ -83,8 +83,10 @@ def tweet():
 
     while True:
 
-        # 前回のデータ更新から1日が経っているなら、
-        if datetime.datetime.now() - last_data_update_time > datetime.timedelta(days=1):
+        print(datetime.datetime.now().hour)
+        # 前回のデータ更新から2時間が経っているかつ、0時台なら
+        if datetime.datetime.now() - last_data_update_time > datetime.timedelta(hours=2) and datetime.datetime.now().hour == 0:
+            last_data_update_time = datetime.datetime.now()
             # データを更新する
             search_exercise_data(api, exercise_data_list)
             print("data updated")
@@ -140,10 +142,11 @@ def tweet():
                     cal_ranking = exercise_data_list.index(exercise_data)
 
                     tweet = "@" + str(status.user.screen_name) +'\n'
-                    tweet += str(exercise_data.exercise_cal) + "kcal消費！ いい汗かいたね！お疲れ様！\n"
+                    tweet += str(exercise_data.exercise_cal) + "kcal消費 いい汗かいたね！お疲れ様！\n"
                     tweet += f"今日の順位 {cal_ranking+1}位/{len(exercise_data_list)}人中"
                     ringfitter.DataListToHistgram(ringfitter.CovertDatalistToCallist(exercise_data_list),cal_ranking)
-                    api.update_with_media(status=tweet, in_reply_to_status_id=status.id,filename='./hist.jpg')
+                    api.update_with_media(status=tweet, in_reply_to_status_id=status.id,filename='./hist.png')
+                    #tweet_ranking(api, exercise_data_list)
                 except tweepy.error.TweepError:
                     import traceback
                     traceback.print_exc()
