@@ -1,6 +1,7 @@
-import numpy as np
 import cv2
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+
 import glob
 import io
 import os
@@ -11,6 +12,7 @@ import os
 import re
 import datetime
 import numpy as np
+
 import seaborn as sns
 
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = './client_credentials.json'
@@ -83,7 +85,9 @@ def ImageToData(user_name):
     total_cal =  fetch_image[396:396+65,586:586+371]
     total_distance = fetch_image[493:493+76,560:560+396]
 
-    time = readTime(total_time)
+    #time = readTime(total_time)
+    # dummyData
+    time = datetime.time(second=0)
     cal = readCal(total_cal)
     return ExerciseData(time,cal,user_name)
 
@@ -94,19 +98,23 @@ def CovertDatalistToCallist(exercise_data_list):
     return [e.exercise_cal for e in exercise_data_list]
 
 def DataListToHistgram(exercise_list,ranking):
-    n, bins, patches = plt.hist(exercise_list,color= 'darkturquoise')
+    n, bins, patches = plt.hist(exercise_list,color= 'darkturquoise',ec='black',bins=20)
     print(n, bins)
-    print(np.where(bins >= exercise_list[ranking])[0][0])
-    x = np.where(bins >= exercise_list[ranking])[0][0]
+    print(exercise_list[ranking])
+    print("xは",np.where(exercise_list[ranking] >= bins)[0][-1])
+    x = np.where(exercise_list[ranking] >= bins)[0][-1]
     patches[x].set_facecolor('tomato')
-    plt.savefig('hist.jpg')  # ヒストグラムを保存
+    # y軸を整数にする
+    plt.gca().get_yaxis().set_major_locator(ticker.MaxNLocator(integer=True))
+    plt.savefig('hist.png')  # ヒストグラムを保存
 
-num_list=[0,0,0,10,30,30,30,40,50,70,90,100]
-time_ranking = 4
-n, bins, patches = plt.hist(num_list,color= 'darkturquoise')
+num_list=[0,0,0,10,10.1,30,30,30,30.2,40,50,70,90,200]
+time_ranking = 9
+n, bins, patches = plt.hist(num_list,color= 'darkturquoise',ec='black',bins=20)
 print(n,bins)
-print(np.where(bins>=num_list[time_ranking])[0][0])
-x= np.where(bins>=num_list[time_ranking])[0][0]
+print(np.where(num_list[time_ranking]>= bins)[0][-1])
+x= np.where(num_list[time_ranking]>= bins)[0][-1]
 patches[x].set_facecolor('tomato')
-plt.savefig('hist.jpg')
+plt.gca().get_yaxis().set_major_locator(ticker.MaxNLocator(integer=True))
+plt.savefig('hist.png')
 plt.show()
