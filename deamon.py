@@ -1,4 +1,4 @@
-import tweet
+import tweet_bot
 import sys
 import traceback
 from daemon import DaemonContext
@@ -30,7 +30,7 @@ class BotDaemon:
     def __do_process(self):
         try:
             while True:
-                tweet.tweet()
+                tweet_bot.tweet()
         except Exception as e:
             raise
 

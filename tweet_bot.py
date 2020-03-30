@@ -4,7 +4,7 @@ import datetime
 import config
 import time
 import urllib
-import ringfitter
+import info_convert
 
 
 # TwitterのAPI_TOKEN
@@ -32,7 +32,7 @@ def search_exercise_data(api, exercise_data_list, max_number=50):
         if not fetch_image(tweet): continue
         try:
             # 画像から運動記録を読み取る
-            exercise_data = ringfitter.image_to_data(tweet.user.name)
+            exercise_data = info_convert.image_to_data(tweet.user.name)
             # リストに運動記録を追加
             exercise_data_list.append(exercise_data)
             if len(exercise_data_list) >= max_number: return
@@ -66,7 +66,7 @@ def fetch_image(status):
         print("save miss")
         return False
     # 運動結果の画像でなければ飛ばす
-    if not ringfitter.is_result_image(): return False
+    if not info_convert.is_result_image(): return False
     return True
 
 
@@ -134,7 +134,7 @@ def tweet():
                     # api.create_favorite(status.id)
 
                     # 画像から運動記録を読み取る
-                    exercise_data = ringfitter.image_to_data(status.user.name)
+                    exercise_data = info_convert.image_to_data(status.user.name)
 
                     # リストに運動記録を追加
                     exercise_data_list.append(exercise_data)
@@ -148,7 +148,7 @@ def tweet():
                     tweet = "@" + str(status.user.screen_name) + '\n'
                     tweet += str(exercise_data.exercise_cal) + "kcal消費 いい汗かいたね！お疲れ様！\n"
                     tweet += f"今日の順位 {cal_ranking + 1}位/{len(exercise_data_list)}人中"
-                    ringfitter.datalist_to_histogram(ringfitter.convert_datalist_to_callist(exercise_data_list), cal_ranking)
+                    info_convert.datalist_to_histogram(info_convert.convert_datalist_to_callist(exercise_data_list), cal_ranking)
                     api.update_with_media(status=tweet, in_reply_to_status_id=status.id, filename='./hist.png')
                     # tweet_ranking(api, exercise_data_list)
                 except tweepy.error.TweepError:
