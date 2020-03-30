@@ -157,5 +157,9 @@ def tweet():
 
         time.sleep(60)
         print("1分経過")
+        time.sleep(60)
+        print("2分経過")
+        time.sleep(60)
+        print("3分経過")
 
 tweet()
