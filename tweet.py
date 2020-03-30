@@ -17,6 +17,9 @@ CS = config.CONSUMER_SECRET
 AT = config.ACCESS_TOKEN
 AS = config.ACCESS_TOKEN_SECRET
 
+# タイムゾーン指定
+JST = datetime.timezone(datetime.timedelta(hours=+9), 'JST')
+
 # TwitterAPI認証用関数
 def authTwitter():
   auth = tweepy.OAuthHandler(CK, CS)
@@ -26,7 +29,7 @@ def authTwitter():
 
 # 運動記録をツイッター上から検索し、データベースに追加する
 def search_exercise_data(api,exercise_data_list,max_number=50):
-    for tweet in tweepy.Cursor(api.search, q='#リングフィットアドベンチャー').items(10000):
+    for tweet in tweepy.Cursor(api.search, q='#リングフィットアドベンチャー  -filter:retweets').items(max_number*10):
         print(tweet.text)
         if not fetch_image(tweet): continue
         try:
@@ -76,25 +79,26 @@ def tweet():
     #最初にデータを検索、保存する
     search_exercise_data(api,exercise_data_list)
     #データを検索した日時を記録
-    last_data_update_time = datetime.datetime.now()
+    last_data_update_time = datetime.datetime.now(JST)
     # --------------------------------------------------------------
     ID_LIST = []
     first_time = True
 
     while True:
 
-        print(datetime.datetime.now().hour)
+        print(datetime.datetime.now(JST).hour)
         # 前回のデータ更新から2時間が経っているかつ、0時台なら
-        if datetime.datetime.now() - last_data_update_time > datetime.timedelta(hours=2) and datetime.datetime.now().hour == 0:
-            last_data_update_time = datetime.datetime.now()
+        if datetime.datetime.now(JST) - last_data_update_time > datetime.timedelta(hours=2) and datetime.datetime.now(JST).hour == 0:
+            last_data_update_time = datetime.datetime.now(JST)
             # データを更新する
+            exercise_data_list=[]
             search_exercise_data(api, exercise_data_list)
             print("data updated")
             # ランキングを呟く
             tweet_ranking(api,exercise_data_list)
 
-        # タイムラインを取得する
-        public_tweets = api.home_timeline()
+        # 「#リングフィットランカー」のタグを含むツイートを取得する(RT除く)
+        public_tweets = api.search(q="#リングフィットランカー -filter:retweets")
 
         renew = False
         for tweet in public_tweets:
