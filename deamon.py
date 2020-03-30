@@ -2,11 +2,13 @@ import tweet
 import sys
 import traceback
 from daemon import DaemonContext
-from os     import path
+from os import path
 from lockfile.pidlockfile import PIDLockFile
 
 import io
+
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
 
 class BotDaemon:
     def __init__(self):
@@ -16,9 +18,9 @@ class BotDaemon:
     def exec(self):
         try:
             dc = DaemonContext(
-                working_directory = self.work_dir,
-                pidfile = PIDLockFile("/tmp/{}.pid".format(self.basename)),
-                stderr = open("{}.err".format(self.basename), "a+")
+                working_directory=self.work_dir,
+                pidfile=PIDLockFile("/tmp/{}.pid".format(self.basename)),
+                stderr=open("{}.err".format(self.basename), "a+")
             )
             with dc:
                 self.__do_process()
@@ -31,6 +33,7 @@ class BotDaemon:
                 tweet.tweet()
         except Exception as e:
             raise
+
 
 if __name__ == '__main__':
     try:
