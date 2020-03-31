@@ -20,6 +20,7 @@ class BotDaemon:
             dc = DaemonContext(
                 working_directory=self.work_dir,
                 pidfile=PIDLockFile("/tmp/{}.pid".format(self.basename)),
+                stdout=open("{}.out".format(self.basename), "a+"),
                 stderr=open("{}.err".format(self.basename), "a+")
             )
             with dc:
