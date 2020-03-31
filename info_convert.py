@@ -113,15 +113,16 @@ def datalist_to_histogram(exercise_list, ranking):
     plt.gca().get_yaxis().set_major_locator(ticker.MaxNLocator(integer=True))
     plt.savefig('hist.png')  # ヒストグラムを保存
 
-'''
-num_list = [0, 0, 0, 10, 10.1, 30, 30, 30, 30.2, 40, 50, 70, 90, 200]
-time_ranking = 9
-n, bins, patches = plt.hist(num_list, color='darkturquoise', ec='black', bins=20)
-print(n, bins)
-print(np.where(num_list[time_ranking] >= bins)[0][-1])
-x = np.where(num_list[time_ranking] >= bins)[0][-1]
-patches[x].set_facecolor('tomato')
-plt.gca().get_yaxis().set_major_locator(ticker.MaxNLocator(integer=True))
-plt.savefig('hist.png')
-plt.show()
-'''
+
+if __name__ == '__main__':
+    # ヒストグラムのテスト
+    num_list = [0, 0, 0, 10, 10.1, 30, 30, 30, 30.2, 40, 50, 70, 90, 200]
+    time_ranking = 9
+    n, bins, patches = plt.hist(num_list, color='darkturquoise', ec='black', bins=20)
+    print(n, bins)
+    print(np.where(num_list[time_ranking] >= bins)[0][-1])
+    x = np.where(num_list[time_ranking] >= bins)[0][-1]
+    patches[x].set_facecolor('tomato')
+    plt.gca().get_yaxis().set_major_locator(ticker.MaxNLocator(integer=True))
+    plt.savefig('hist.png')
+    plt.show()
