@@ -91,12 +91,12 @@ def tweet():
         if datetime.datetime.now(JST) - last_data_update_time > datetime.timedelta(hours=2) and datetime.datetime.now(
                 JST).hour == 0:
             last_data_update_time = datetime.datetime.now(JST)
+            # ランキングを呟く
+            tweet_ranking(api, exercise_data_list)
             # データを更新する
             exercise_data_list = []
             search_exercise_data(api, exercise_data_list)
             print("data updated")
-            # ランキングを呟く
-            tweet_ranking(api, exercise_data_list)
 
         # TWITTER_IDに対しての@コメントか、「#リングフィットランカー」のタグを含むツイートを取得する(RT除く)
         public_tweets = api.search(q=f"@{TWITTER_ID} OR #リングフィットランカー -filter:retweets filter:images -from:{TWITTER_ID}")
