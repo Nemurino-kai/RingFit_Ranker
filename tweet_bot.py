@@ -158,3 +158,7 @@ def tweet():
         print("2分経過")
         time.sleep(60)
         print("3分経過")
+
+
+if __name__ == '__main__':
+    tweet()
