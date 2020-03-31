@@ -6,12 +6,13 @@ import time
 import urllib
 import info_convert
 
-
 # TwitterのAPI_TOKEN
 CK = config.CONSUMER_KEY
 CS = config.CONSUMER_SECRET
 AT = config.ACCESS_TOKEN
 AS = config.ACCESS_TOKEN_SECRET
+
+TWITTER_ID = config.TWITTER_ID
 
 # タイムゾーン指定
 JST = datetime.timezone(datetime.timedelta(hours=+9), 'JST')
@@ -26,8 +27,8 @@ def auth_twitter():
 
 
 # 運動記録をツイッター上から検索し、データベースに追加する
-def search_exercise_data(api, exercise_data_list, max_number=50):
-    for tweet in tweepy.Cursor(api.search, q='#リングフィットアドベンチャー  -filter:retweets').items(max_number * 10):
+def search_exercise_data(api, exercise_data_list, max_number=30):
+    for tweet in tweepy.Cursor(api.search, q='#リングフィットアドベンチャー -filter:retweets filter:images').items(max_number * 10):
         print(tweet.text)
         if not fetch_image(tweet): continue
         try:
@@ -97,8 +98,8 @@ def tweet():
             # ランキングを呟く
             tweet_ranking(api, exercise_data_list)
 
-        # 「#リングフィットランカー」のタグを含むツイートを取得する(RT除く)
-        public_tweets = api.search(q="#リングフィットランカー -filter:retweets")
+        # RingFitRankerに対しての返信か、「#リングフィットランカー」のタグを含むツイートを取得する(RT除く)
+        public_tweets = api.search(q=f"to:{TWITTER_ID} OR #リングフィットランカー -filter:retweets filter:images")
 
         renew = False
         for tweet in public_tweets:
@@ -126,34 +127,30 @@ def tweet():
                 break
             tweet_ID = ID_LIST.pop()
             status = api.get_status(tweet_ID)
-            # 「リングフィット」をtweet内に含む
-            if "リングフィット" in str(status.text):
-                if not fetch_image(status): continue
-                try:
-                    # いいねする
-                    # api.create_favorite(status.id)
+            if not fetch_image(status): continue
+            try:
+                # 画像から運動記録を読み取る
+                exercise_data = info_convert.image_to_data(status.user.name)
 
-                    # 画像から運動記録を読み取る
-                    exercise_data = info_convert.image_to_data(status.user.name)
+                # リストに運動記録を追加
+                exercise_data_list.append(exercise_data)
 
-                    # リストに運動記録を追加
-                    exercise_data_list.append(exercise_data)
+                # リストを消費カロリー順でソート
+                exercise_data_list = sorted(exercise_data_list, key=lambda e: e.exercise_cal, reverse=True)
 
-                    # リストを消費カロリー順でソート
-                    exercise_data_list = sorted(exercise_data_list, key=lambda e: e.exercise_cal, reverse=True)
+                # 消費カロリーの順位を計算する
+                cal_ranking = exercise_data_list.index(exercise_data)
 
-                    # 消費カロリーの順位を計算する
-                    cal_ranking = exercise_data_list.index(exercise_data)
-
-                    tweet = "@" + str(status.user.screen_name) + '\n'
-                    tweet += str(exercise_data.exercise_cal) + "kcal消費 いい汗かいたね！お疲れ様！\n"
-                    tweet += f"今日の順位 {cal_ranking + 1}位/{len(exercise_data_list)}人中"
-                    info_convert.datalist_to_histogram(info_convert.convert_datalist_to_callist(exercise_data_list), cal_ranking)
-                    api.update_with_media(status=tweet, in_reply_to_status_id=status.id, filename='./hist.png')
-                    # tweet_ranking(api, exercise_data_list)
-                except tweepy.error.TweepError:
-                    import traceback
-                    traceback.print_exc()
+                tweet = "@" + str(status.user.screen_name) + '\n'
+                tweet += str(exercise_data.exercise_cal) + "kcal消費 いい汗かいたね！お疲れ様！\n"
+                tweet += f"今日の順位 {cal_ranking + 1}位/{len(exercise_data_list)}人中"
+                info_convert.datalist_to_histogram(info_convert.convert_datalist_to_callist(exercise_data_list),
+                                                   cal_ranking)
+                api.update_with_media(status=tweet, in_reply_to_status_id=status.id, filename='./hist.png')
+                # tweet_ranking(api, exercise_data_list)
+            except tweepy.error.TweepError:
+                import traceback
+                traceback.print_exc()
 
         time.sleep(60)
         print("1分経過")
