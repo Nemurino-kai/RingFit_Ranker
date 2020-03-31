@@ -98,8 +98,8 @@ def tweet():
             # ランキングを呟く
             tweet_ranking(api, exercise_data_list)
 
-        # RingFitRankerに対しての返信か、「#リングフィットランカー」のタグを含むツイートを取得する(RT除く)
-        public_tweets = api.search(q=f"to:{TWITTER_ID} OR #リングフィットランカー -filter:retweets filter:images")
+        # TWITTER_IDに対しての@コメントか、「#リングフィットランカー」のタグを含むツイートを取得する(RT除く)
+        public_tweets = api.search(q=f"@{TWITTER_ID} OR #リングフィットランカー -filter:retweets filter:images -from:{TWITTER_ID}")
 
         renew = False
         for tweet in public_tweets:
