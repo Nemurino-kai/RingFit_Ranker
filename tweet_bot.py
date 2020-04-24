@@ -101,6 +101,8 @@ def tweet():
         # TWITTER_IDに対しての@コメントか、「#リングフィットランカー」のタグを含むツイートを取得する(RT除く)
         public_tweets = api.search(q=f"@{TWITTER_ID} OR #リングフィットランカー -filter:retweets filter:images -from:{TWITTER_ID}")
 
+        TMP=0
+
         renew = False
         for tweet in public_tweets:
             if not renew:
@@ -152,12 +154,8 @@ def tweet():
                 import traceback
                 traceback.print_exc()
 
-        time.sleep(60)
-        print("1分経過")
-        time.sleep(60)
-        print("2分経過")
-        time.sleep(60)
-        print("3分経過")
+        print("5分sleep")
+        time.sleep(300)
 
 
 if __name__ == '__main__':
