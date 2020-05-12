@@ -5,6 +5,7 @@ import config
 import time
 import urllib
 import info_convert
+import sqlite3
 
 # TwitterのAPI_TOKEN
 CK = config.CONSUMER_KEY
@@ -72,6 +73,14 @@ def fetch_image(status):
 
 
 def tweet():
+
+    ## Tableが無ければ作成する
+    conn = sqlite3.connect('result.db')
+    cur = conn.cursor()
+    cur.execute(
+        'create table if not exists Excercise (id INTEGER PRIMARY KEY AUTOINCREMENT,date TEXT,kcal REAL,username TEXT,tweet_id TEXT)'
+    )
+
     api = auth_twitter()
     end_tweet_id = 0
     exercise_data_list = []
