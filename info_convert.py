@@ -98,16 +98,16 @@ def convert_datalist_to_timelist(exercise_data_list):
             exercise_data_list]
 
 
-def convert_datalist_to_callist(exercise_data_list):
-    return [e.exercise_cal for e in exercise_data_list]
+def convert_datatuple_to_callist(exercise_data_list):
+    return [e[0] for e in exercise_data_list]
 
 
 def datalist_to_histogram(exercise_list, ranking):
     n, bins, patches = plt.hist(exercise_list, color='darkturquoise', ec='black', bins=20)
     print(n, bins)
     print(exercise_list[ranking])
-    print("xは", np.where(exercise_list[ranking] >= bins)[0][-1])
-    x = np.where(exercise_list[ranking] >= bins)[0][-1]
+    print("xは", np.where(exercise_list[ranking] > bins)[0][-1])
+    x = np.where(exercise_list[ranking] > bins)[0][-1]
     patches[x].set_facecolor('tomato')
     # y軸を整数にする
     plt.gca().get_yaxis().set_major_locator(ticker.MaxNLocator(integer=True))
