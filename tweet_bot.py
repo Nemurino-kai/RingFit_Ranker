@@ -28,7 +28,7 @@ def auth_twitter():
 
 
 # 運動記録をツイッター上から検索し、データベースに追加する
-def search_exercise_data(api, max_number=30):
+def search_exercise_data(api, max_number=5):
     conn = sqlite3.connect(config.DATABASE_NAME)
     cur = conn.cursor()
     player_num=0
@@ -42,8 +42,8 @@ def search_exercise_data(api, max_number=30):
             # DBに運動記録を追加
             params = (exercise_data.exercise_cal,tweet.user.name,tweet.user.screen_name,tweet.id)
             cur.execute(
-                'insert into Exercise (kcal,user_name,user_screen_name,tweet_id) '
-                'values (?,?,?,?)',params
+                "insert into Exercise (kcal,user_name,user_screen_name,tweet_id) "
+                "values (?,?,?,?)",params
             )
             player_num = player_num+1
 
@@ -60,8 +60,10 @@ def search_exercise_data(api, max_number=30):
 def tweet_ranking(api):
     conn = sqlite3.connect(config.DATABASE_NAME)
     cur = conn.cursor()
-    # DBから抽出し、消費カロリーの多い順でソート
-    cur.execute('select user_name,kcal from Exercise ORDER BY kcal DESC')
+    # DBから前日分の運動結果を抽出し、消費カロリーの多い順でソート
+    # +9hours-24hours=15hours(時差-24時間分で前日のdataを取得)
+    cur.execute("select user_name,kcal from Exercise "
+                "WHERE date(time_stamp) == date('now', '-15 hours') ORDER BY kcal DESC ;")
     exerise_data_list = cur.fetchall()
     tweet = "今日のランキング発表！\n"
     for i, exercise_data in enumerate(exerise_data_list):
@@ -96,7 +98,7 @@ def tweet():
     cur.execute(
         "create table if not exists Exercise ("
         "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-        "date TEXT NOT NULL DEFAULT (DATETIME('now', '+9 hours')),"
+        "time_stamp TEXT NOT NULL DEFAULT (DATETIME('now', '+9 hours')),"
         "kcal REAL NOT NULL ,"
         "user_name TEXT NOT NULL ,"
         "user_screen_name TEXT NOT NULL ,"
@@ -109,6 +111,7 @@ def tweet():
 
     # 最初にデータを検索、保存する
     search_exercise_data(api)
+
     # データを検索した日時を記録
     last_data_update_time = datetime.datetime.now(JST)
     # --------------------------------------------------------------
@@ -172,15 +175,17 @@ def tweet():
                 )
                 conn.commit()
 
-                # DBを抽出し、消費カロリー順でソート
-                cur.execute('select kcal from Exercise ORDER BY kcal DESC')
+                # DBから今日の分のデータを抽出し、消費カロリー順でソート
+                cur.execute("select kcal from Exercise "
+                            "WHERE date(time_stamp) == date('now', '-9 hours') ORDER BY kcal DESC ;")
                 exercise_data_list = cur.fetchall()
                 print(exercise_data)
 
                 # 消費カロリーの順位を計算する
                 # tuple にするためカンマをつけている
-                params =(exercise_data.exercise_cal, )
-                cur.execute('select count(*) from Exercise where Exercise.kcal > ?', params)
+                params = (exercise_data.exercise_cal, )
+                cur.execute("select count(*) from Exercise WHERE Exercise.kcal > ? "
+                            "AND date(time_stamp) == date('now', '-9 hours')", params)
                 cal_ranking = int(cur.fetchone()[0])
                 print(cal_ranking)
 
