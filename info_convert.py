@@ -13,6 +13,7 @@ import numpy as np
 from PIL import Image
 import sys
 import pyocr.builders
+import image_processing
 
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = './client_credentials.json'
 THRESHOLD = 0.95
@@ -38,6 +39,8 @@ def read_text(image):
     return texts
 
 def read_cal_by_tesseract(image):
+    image = image_processing.rotate_image(image, 7)
+
     # 大津の二値化をしておく
     im_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     _, image = cv2.threshold(im_gray, 0, 255, cv2.THRESH_OTSU)
@@ -63,12 +66,20 @@ def read_cal_by_tesseract(image):
 
     # よくある誤字を修正
     retext = txt.replace(' ', '').replace('i', '1').replace(']', '1').replace('t', '1')\
-        .replace('?','2').replace('O','0').replace('A','4')
+        .replace('?','2').replace('O','0').replace('A','4').replace('l','1').replace('I','1')
 
-    # 数字以外はすべて取り除く
-    retext = re.sub('[^0-9]','', retext)
+    # 数字以外はすべて取り除き、intにする
+    retext = int(re.sub('[^0-9]','', retext))
 
-    return float(retext)
+    # kcalが4桁はあり得ないのでエラー
+    try:
+        if(retext >999):
+            raise ValueError("Cal is too large!")
+    except ValueError as e:
+        print(e)
+        retext = 999
+
+    return int(retext)
 
 
 def read_time(time_image):
