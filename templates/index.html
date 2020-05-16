@@ -20,12 +20,15 @@
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>1</td>
-                  <td>DoubleZ</td>
-                  <td>100.56</td>
-                  <td>2020.02.05 19:22:06</td>
-                </tr>
+    {% for result in results %}
+    <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ result[0] }}</td>
+        <td>{{ result[1] }}</td>
+        <td>{{ result[2] }}</td>
+    </tr>
+    {% endfor %}
+
                </tbody>
             </table>
           </div>
