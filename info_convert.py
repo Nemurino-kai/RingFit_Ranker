@@ -10,6 +10,10 @@ import re
 import datetime
 import numpy as np
 
+from PIL import Image
+import sys
+import pyocr.builders
+
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = './client_credentials.json'
 THRESHOLD = 0.95
 TEMPLATE = cv2.imread('template.jpg')
@@ -32,6 +36,39 @@ def read_text(image):
     response = client.text_detection(image=decode_image)
     texts = response.text_annotations
     return texts
+
+def read_cal_by_tesseract(image):
+    # 大津の二値化をしておく
+    im_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    _, image = cv2.threshold(im_gray, 0, 255, cv2.THRESH_OTSU)
+    image = Image.fromarray(image)
+
+    tools = pyocr.get_available_tools()
+    if len(tools) == 0:
+        print("No OCR tool found")
+        sys.exit(1)
+    # The tools are returned in the recommended order of usage
+    tool = tools[0]
+    langs = tool.get_available_languages()
+    print("Available languages: %s" % ", ".join(langs))
+    lang = langs[0]
+    print("Will use lang '%s'" % (langs))
+
+    txt = tool.image_to_string(
+        image,
+        lang=lang,
+        builder=pyocr.builders.TextBuilder(tesseract_layout=6)
+    )
+    print(txt)
+
+    # よくある誤字を修正
+    retext = txt.replace(' ', '').replace('i', '1').replace(']', '1').replace('t', '1')\
+        .replace('?','2').replace('O','0').replace('A','4')
+
+    # 数字以外はすべて取り除く
+    retext = re.sub('[^0-9]','', retext)
+
+    return float(retext)
 
 
 def read_time(time_image):
@@ -83,13 +120,13 @@ def image_to_data(user_name):
 
     # 各部分の画像を切り出す
     total_time = fetch_image[257:257 + 84, 552:552 + 404]
-    total_cal = fetch_image[396:396 + 65, 586:586 + 371]
+    total_cal = fetch_image[396:396 + 65, 586:586 + 228]
     total_distance = fetch_image[493:493 + 76, 560:560 + 396]
 
     # time = read_time(total_time)
     # dummyData
     time = datetime.time(second=0)
-    cal = read_cal(total_cal)
+    cal = read_cal_by_tesseract(total_cal)
     return ExerciseData(time, cal, user_name)
 
 

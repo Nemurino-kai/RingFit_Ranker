@@ -34,7 +34,9 @@ def search_exercise_data(api, max_number=30):
     player_num=0
     for tweet in tweepy.Cursor(api.search, q='#リングフィットアドベンチャー -filter:retweets filter:images').items(max_number * 10):
         print(tweet.text)
-        if not fetch_image(tweet): continue
+        # idが重複していたり、imgがリングフィットのものでなければcontinue
+        cur.execute("select count(*) from Exercise where tweet_id == ?", (tweet.id,))
+        if int(cur.fetchone()[0]) or not fetch_image(tweet): continue
         try:
             # 画像から運動記録を読み取る
             exercise_data = info_convert.image_to_data(tweet.user.name)
@@ -43,7 +45,7 @@ def search_exercise_data(api, max_number=30):
             params = (exercise_data.exercise_cal,tweet.user.name,tweet.user.screen_name,tweet.id)
             cur.execute(
                 "insert into Exercise (kcal,user_name,user_screen_name,tweet_id) "
-                "values (?,?,?,?)",params
+                "values (?,?,?,?) ",params
             )
             player_num = player_num+1
 
@@ -126,7 +128,7 @@ def tweet():
             last_data_update_time = datetime.datetime.now(JST)
             # ランキングを呟く
             tweet_ranking(api)
-            # データを更新する
+            # データを追加する
             search_exercise_data(api)
             print("data updated")
 
@@ -200,6 +202,8 @@ def tweet():
                 import traceback
                 traceback.print_exc()
 
+        print("画像を検索")
+        search_exercise_data(api)
         print("5分sleep")
         time.sleep(300)
 
