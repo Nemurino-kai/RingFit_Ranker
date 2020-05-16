@@ -28,7 +28,7 @@ def auth_twitter():
 
 
 # 運動記録をツイッター上から検索し、データベースに追加する
-def search_exercise_data(api, max_number=5):
+def search_exercise_data(api, max_number=30):
     conn = sqlite3.connect(config.DATABASE_NAME)
     cur = conn.cursor()
     player_num=0
@@ -120,7 +120,6 @@ def tweet():
 
     while True:
 
-        print(datetime.datetime.now(JST).hour)
         # 前回のデータ更新から2時間が経っているかつ、0時台なら
         if datetime.datetime.now(JST) - last_data_update_time > datetime.timedelta(hours=2) and datetime.datetime.now(
                 JST).hour == 0:
@@ -177,7 +176,7 @@ def tweet():
 
                 # DBから今日の分のデータを抽出し、消費カロリー順でソート
                 cur.execute("select kcal from Exercise "
-                            "WHERE date(time_stamp) == date('now', '-9 hours') ORDER BY kcal DESC ;")
+                            "WHERE date(time_stamp) == date('now', '+9 hours') ORDER BY kcal DESC ;")
                 exercise_data_list = cur.fetchall()
                 print(exercise_data)
 
@@ -185,7 +184,7 @@ def tweet():
                 # tuple にするためカンマをつけている
                 params = (exercise_data.exercise_cal, )
                 cur.execute("select count(*) from Exercise WHERE Exercise.kcal > ? "
-                            "AND date(time_stamp) == date('now', '-9 hours')", params)
+                            "AND date(time_stamp) == date('now', '+9 hours')", params)
                 cal_ranking = int(cur.fetchone()[0])
                 print(cal_ranking)
 
