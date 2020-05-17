@@ -34,18 +34,20 @@ def search_exercise_data(api, max_number=30):
     player_num=0
     for tweet in tweepy.Cursor(api.search, q='#リングフィットアドベンチャー -filter:retweets filter:images').items(max_number * 10):
         print(tweet.text)
-        # idが重複していたり、imgがリングフィットのものでなければcontinue
+        # idが重複していたら、すでにそこまで検索してあるので中断
         cur.execute("select count(*) from Exercise where tweet_id == ?", (tweet.id,))
-        if int(cur.fetchone()[0]) or not fetch_image(tweet): continue
+        if int(cur.fetchone()[0]): return
+        # imgがリングフィットのものでなければcontinue
+        if not fetch_image(tweet): continue
         try:
             # 画像から運動記録を読み取る
             exercise_data = info_convert.image_to_data(tweet.user.name)
             print(exercise_data.exercise_cal)
             # DBに運動記録を追加
-            params = (exercise_data.exercise_cal,tweet.user.name,tweet.user.screen_name,tweet.id)
+            params = (exercise_data.exercise_cal,tweet.user.name,tweet.user.screen_name,tweet.id,tweet.created_at+ datetime.timedelta(hours=9))
             cur.execute(
-                "insert into Exercise (kcal,user_name,user_screen_name,tweet_id) "
-                "values (?,?,?,?) ",params
+                "insert into Exercise (kcal,user_name,user_screen_name,tweet_id,tweeted_time) "
+                "values (?,?,?,?,?) ",params
             )
             player_num = player_num+1
 
@@ -101,6 +103,7 @@ def tweet():
         "create table if not exists Exercise ("
         "id INTEGER PRIMARY KEY AUTOINCREMENT,"
         "time_stamp TEXT NOT NULL DEFAULT (DATETIME('now', '+9 hours')),"
+        "tweeted_time TEXT NOT NULL,"
         "kcal REAL NOT NULL ,"
         "user_name TEXT NOT NULL ,"
         "user_screen_name TEXT NOT NULL ,"
@@ -169,10 +172,10 @@ def tweet():
                 exercise_data = info_convert.image_to_data(status.user.name)
 
                 # DBに運動記録を追加
-                params = (exercise_data.exercise_cal, status.user.name, status.user.screen_name, tweet_ID)
+                params = (exercise_data.exercise_cal, status.user.name, status.user.screen_name, tweet_ID,status.created_at + datetime.timedelta(hours=9))
                 cur.execute(
-                    'insert into Exercise (kcal,user_name,user_screen_name,tweet_id) '
-                    'values (?,?,?,?)', params
+                    'insert into Exercise (kcal,user_name,user_screen_name,tweet_id,tweeted_time) '
+                    'values (?,?,?,?,?)', params
                 )
                 conn.commit()
 
