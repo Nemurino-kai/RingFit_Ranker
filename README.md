@@ -1,6 +1,6 @@
 # RingFit_Ranker
 リングフィットアドベンチャーの画像を収集し、消費カロリーをTesseractで読み取り、順位を呟くbot<br>
-毎日0時頃に、消費カロリー数ランキング Top3を呟きます。
+毎日0時頃に、消費カロリー数ランキング Top3を呟きます。<br>
 フォロワーが #リングフィットアドベンチャー タグをつけて画像をツイートすると、順位をリプライします。
 
 ![EURqlAXU0AI-QHw](https://user-images.githubusercontent.com/40136659/82156108-2e819180-98b4-11ea-9bab-dbfe2e5b1b84.jpg)
