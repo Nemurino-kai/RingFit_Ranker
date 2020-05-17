@@ -6,6 +6,7 @@ import time
 import urllib
 import info_convert
 import sqlite3
+from tqdm import tqdm
 
 # TwitterのAPI_TOKEN
 CK = config.CONSUMER_KEY
@@ -27,12 +28,15 @@ def auth_twitter():
     return api
 
 
-# 運動記録をツイッター上から検索し、データベースに追加する
-def search_exercise_data(api, max_number=30):
+# 運動記録をツイッター上から検索し、データベースに追加する, フォローしてくれている人にはリプライする。
+def search_exercise_data(api, max_number=100):
     conn = sqlite3.connect(config.DATABASE_NAME)
     cur = conn.cursor()
     player_num=0
-    for tweet in tweepy.Cursor(api.search, q='#リングフィットアドベンチャー -filter:retweets filter:images').items(max_number * 10):
+    # フォローしてくれている人を取得
+    follower_id = api.followers_ids()
+    for tweet in tweepy.Cursor(api.search, q=f'#リングフィットアドベンチャー -filter:retweets filter:images OR @{TWITTER_ID}'
+    f' OR #リングフィットランカー -filter:retweets filter:images -from:{TWITTER_ID}').items(max_number * 10):
         print(tweet.text)
         # idが重複していたら、すでにそこまで検索してあるので中断
         cur.execute("select count(*) from Exercise where tweet_id == ?", (tweet.id,))
@@ -49,10 +53,16 @@ def search_exercise_data(api, max_number=30):
                 "insert into Exercise (kcal,user_name,user_screen_name,tweet_id,tweeted_time) "
                 "values (?,?,?,?,?) ",params
             )
+            conn.commit()
+
+            # もしフォローしてくれている人なら、順位を呟く
+            if tweet.user.id in follower_id:
+                print(tweet.user.screen_name," さんにお返事します")
+                reply_exercise_result(api,cur,exercise_data,tweet)
+
             player_num = player_num+1
 
             if player_num >= max_number:
-                conn.commit()
                 return
         except tweepy.error.TweepError:
             import traceback
@@ -93,6 +103,29 @@ def fetch_image(status):
     if not info_convert.is_result_image(): return False
     return True
 
+def reply_exercise_result(api,cur,exercise_data,status):
+    # DBから今日の分のデータを抽出し、消費カロリー順でソート
+    cur.execute("select kcal from Exercise "
+                "WHERE date(time_stamp) == date('now', '+9 hours') ORDER BY kcal DESC ;")
+    exercise_data_list = cur.fetchall()
+    print(exercise_data)
+
+    # 消費カロリーの順位を計算する
+    # tuple にするためカンマをつけている
+    params = (exercise_data.exercise_cal,)
+    cur.execute("select count(*) from Exercise WHERE Exercise.kcal > ? "
+                "AND date(time_stamp) == date('now', '+9 hours')", params)
+    cal_ranking = int(cur.fetchone()[0])
+    print(cal_ranking)
+
+    tweet = "@" + str(status.user.screen_name) + '\n'
+    tweet += str(exercise_data.exercise_cal) + "kcal消費 いい汗かいたね！お疲れ様！\n"
+    tweet += f"今日の順位 {cal_ranking + 1}位/{len(exercise_data_list)}人中"
+    print(exercise_data_list)
+    info_convert.datalist_to_histogram(info_convert.convert_datatuple_to_callist(exercise_data_list),
+                                       cal_ranking)
+    api.update_with_media(status=tweet, in_reply_to_status_id=status.id, filename='./hist.png')
+
 
 def tweet():
 
@@ -104,7 +137,7 @@ def tweet():
         "id INTEGER PRIMARY KEY AUTOINCREMENT,"
         "time_stamp TEXT NOT NULL DEFAULT (DATETIME('now', '+9 hours')),"
         "tweeted_time TEXT NOT NULL,"
-        "kcal REAL NOT NULL ,"
+        "kcal INTEGER NOT NULL ,"
         "user_name TEXT NOT NULL ,"
         "user_screen_name TEXT NOT NULL ,"
         "tweet_id NUMERIC NOT NULL UNIQUE)"
@@ -112,18 +145,15 @@ def tweet():
     conn.commit()
 
     api = auth_twitter()
-    end_tweet_id = 0
-
-    # 最初にデータを検索、保存する
-    search_exercise_data(api)
 
     # データを検索した日時を記録
     last_data_update_time = datetime.datetime.now(JST)
     # --------------------------------------------------------------
-    ID_LIST = []
-    first_time = True
 
     while True:
+
+        print("画像を検索")
+        search_exercise_data(api)
 
         # 前回のデータ更新から2時間が経っているかつ、0時台なら
         if datetime.datetime.now(JST) - last_data_update_time > datetime.timedelta(hours=2) and datetime.datetime.now(
@@ -131,84 +161,9 @@ def tweet():
             last_data_update_time = datetime.datetime.now(JST)
             # ランキングを呟く
             tweet_ranking(api)
-            # データを追加する
-            search_exercise_data(api)
-            print("data updated")
 
-        # TWITTER_IDに対しての@コメントか、「#リングフィットランカー」のタグを含むツイートを取得する(RT除く)
-        public_tweets = api.search(q=f"@{TWITTER_ID} OR #リングフィットランカー -filter:retweets filter:images -from:{TWITTER_ID}")
-
-        TMP=0
-
-        renew = False
-        for tweet in public_tweets:
-            if not renew:
-                TMP = tweet.id
-                renew = True
-
-            if tweet.id > end_tweet_id and first_time == False:
-                ID_LIST.append(tweet.id)
-                print(tweet.id),
-                print(":"),
-                print(tweet.text)
-            else:
-                break
-
-        end_tweet_id = TMP
-        first_time = False
-        print("Latest tweet ID>>"),
-        print(end_tweet_id)
-
-        print("今回のTweet_IDリスト"),
-        print(ID_LIST)
-        while True:
-            if ID_LIST == []:
-                break
-            tweet_ID = ID_LIST.pop()
-            status = api.get_status(tweet_ID)
-            if not fetch_image(status): continue
-            try:
-                # 画像から運動記録を読み取る
-                exercise_data = info_convert.image_to_data(status.user.name)
-
-                # DBに運動記録を追加
-                params = (exercise_data.exercise_cal, status.user.name, status.user.screen_name, tweet_ID,status.created_at + datetime.timedelta(hours=9))
-                cur.execute(
-                    'insert into Exercise (kcal,user_name,user_screen_name,tweet_id,tweeted_time) '
-                    'values (?,?,?,?,?)', params
-                )
-                conn.commit()
-
-                # DBから今日の分のデータを抽出し、消費カロリー順でソート
-                cur.execute("select kcal from Exercise "
-                            "WHERE date(time_stamp) == date('now', '+9 hours') ORDER BY kcal DESC ;")
-                exercise_data_list = cur.fetchall()
-                print(exercise_data)
-
-                # 消費カロリーの順位を計算する
-                # tuple にするためカンマをつけている
-                params = (exercise_data.exercise_cal, )
-                cur.execute("select count(*) from Exercise WHERE Exercise.kcal > ? "
-                            "AND date(time_stamp) == date('now', '+9 hours')", params)
-                cal_ranking = int(cur.fetchone()[0])
-                print(cal_ranking)
-
-                tweet = "@" + str(status.user.screen_name) + '\n'
-                tweet += str(exercise_data.exercise_cal) + "kcal消費 いい汗かいたね！お疲れ様！\n"
-                tweet += f"今日の順位 {cal_ranking + 1}位/{len(exercise_data_list)}人中"
-                print(exercise_data_list)
-                info_convert.datalist_to_histogram(info_convert.convert_datatuple_to_callist(exercise_data_list),
-                                                   cal_ranking)
-                api.update_with_media(status=tweet, in_reply_to_status_id=status.id, filename='./hist.png')
-
-            except tweepy.error.TweepError:
-                import traceback
-                traceback.print_exc()
-
-        print("画像を検索")
-        search_exercise_data(api)
         print("5分sleep")
-        time.sleep(300)
+        [time.sleep(10) for i in tqdm(range(30))]
 
 
 if __name__ == '__main__':

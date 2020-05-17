@@ -67,7 +67,7 @@ def read_cal_by_tesseract(image):
     # よくある誤字を修正
     retext = txt.replace(' ', '').replace('i', '1').replace(']', '1').replace('t', '1')\
         .replace('?','2').replace('O','0').replace('A','4').replace('l','1').replace('I','1')\
-    .replace('Q','9')
+    .replace('Q','9').replace('g','9')
 
     # 数字以外はすべて取り除き、intにする
     retext = int(re.sub('[^0-9]','', retext))
@@ -161,8 +161,9 @@ def datalist_to_histogram(exercise_list, ranking):
     n, bins, patches = plt.hist(exercise_list, color='darkturquoise', ec='black', bins=20)
     print(n, bins)
     print(exercise_list[ranking])
-    print("xは", np.where(exercise_list[ranking] > bins)[0][-1])
-    x = np.where(exercise_list[ranking] > bins)[0][-1]
+    print("xは", np.where(exercise_list[ranking] >= bins)[0][-1])
+    x = np.where(exercise_list[ranking] >= bins)[0][-1]
+    if x==20: x= x-1
     patches[x].set_facecolor('tomato')
     # y軸を整数にする
     plt.gca().get_yaxis().set_major_locator(ticker.MaxNLocator(integer=True))
@@ -171,12 +172,15 @@ def datalist_to_histogram(exercise_list, ranking):
 
 if __name__ == '__main__':
     # ヒストグラムのテスト
-    num_list = [0, 0, 0, 10, 10.1, 30, 30, 30, 30.2, 40, 50, 70, 90, 200]
-    time_ranking = 9
+    num_list = [0, 10, 10, 10, 10.1, 30, 30, 30, 30.2, 40, 50, 70, 90, 200]
+    time_ranking =10
     n, bins, patches = plt.hist(num_list, color='darkturquoise', ec='black', bins=20)
     print(n, bins)
+    print(np.where(num_list[time_ranking] >= bins)[0])
+
     print(np.where(num_list[time_ranking] >= bins)[0][-1])
     x = np.where(num_list[time_ranking] >= bins)[0][-1]
+    if x==20:x = 19
     patches[x].set_facecolor('tomato')
     plt.gca().get_yaxis().set_major_locator(ticker.MaxNLocator(integer=True))
     plt.savefig('hist.png')
