@@ -66,7 +66,8 @@ def read_cal_by_tesseract(image):
 
     # よくある誤字を修正
     retext = txt.replace(' ', '').replace('i', '1').replace(']', '1').replace('t', '1')\
-        .replace('?','2').replace('O','0').replace('A','4').replace('l','1').replace('I','1')
+        .replace('?','2').replace('O','0').replace('A','4').replace('l','1').replace('I','1')\
+    .replace('Q','9')
 
     # 数字以外はすべて取り除き、intにする
     retext = int(re.sub('[^0-9]','', retext))
@@ -77,8 +78,9 @@ def read_cal_by_tesseract(image):
             raise ValueError("Cal is too large!")
     except ValueError as e:
         print(e)
-        retext = 999
+        retext = int(re.sub('[^0-9]','', txt))
 
+    if str(retext) != txt: print("Text is replaced.")
     return int(retext)
 
 
@@ -115,6 +117,11 @@ def read_cal(cal_image):
 
 def is_result_image():
     fetch_image = cv2.imread('temp.jpg')
+
+    # fetch_imageのsizeが公式のものでなければout
+    h, w, _ = fetch_image.shape
+    if h != 720 or w != 1280:
+        return False
 
     result = cv2.matchTemplate(fetch_image, TEMPLATE, cv2.TM_CCOEFF_NORMED)
     # 検出結果から検出領域の位置を取得
