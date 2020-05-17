@@ -1,4 +1,5 @@
 # RingFit_Ranker
+Twitter上の <b>#リングフィットアドベンチャー</b> の画像を収集し、順位を呟くbotです
 https://twitter.com/RingFitRanker で運営中
 
 ## 機能１
