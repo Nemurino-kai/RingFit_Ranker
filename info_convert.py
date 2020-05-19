@@ -158,12 +158,12 @@ def convert_datatuple_to_callist(exercise_data_list):
 
 
 def datalist_to_histogram(exercise_list, ranking):
-    n, bins, patches = plt.hist(exercise_list, color='darkturquoise', ec='black', bins=20)
+    n, bins, patches = plt.hist(exercise_list, color='darkturquoise', ec='black', bins=30)
     print(n, bins)
     print(exercise_list[ranking])
     print("xは", np.where(exercise_list[ranking] >= bins)[0][-1])
     x = np.where(exercise_list[ranking] >= bins)[0][-1]
-    if x==20: x= x-1
+    if x==30: x= x-1
     patches[x].set_facecolor('tomato')
     # y軸を整数にする
     plt.gca().get_yaxis().set_major_locator(ticker.MaxNLocator(integer=True))
@@ -171,10 +171,20 @@ def datalist_to_histogram(exercise_list, ranking):
 
 
 if __name__ == '__main__':
+    import sqlite3
+    import config
     # ヒストグラムのテスト
-    num_list = [0, 10, 10, 10, 10.1, 30, 30, 30, 30.2, 40, 50, 70, 90, 200]
+    conn = sqlite3.connect(config.DATABASE_NAME)
+    cur = conn.cursor()
+    cur.execute("select kcal from Exercise "
+                "WHERE date(time_stamp) == date('now', '+9 hours') and kcal < 150 ORDER BY kcal DESC ;")
+    exercise_data_list = cur.fetchall()
+    print(exercise_data_list)
+    num_list = convert_datatuple_to_callist(exercise_data_list)
+
+    #num_list = [0, 10, 10, 10, 10.1, 30, 30, 30, 30.2, 40, 50, 70, 90, 200]
     time_ranking =10
-    n, bins, patches = plt.hist(num_list, color='darkturquoise', ec='black', bins=20)
+    n, bins, patches = plt.hist(num_list, color='darkturquoise', ec='black', bins=30)
     print(n, bins)
     print(np.where(num_list[time_ranking] >= bins)[0])
 
