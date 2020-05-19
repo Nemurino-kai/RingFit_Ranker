@@ -4,6 +4,7 @@ import traceback
 from daemon import DaemonContext
 from os import path
 from lockfile.pidlockfile import PIDLockFile
+import utils
 
 import io
 
@@ -14,6 +15,7 @@ class BotDaemon:
     def __init__(self):
         self.basename = path.splitext(path.basename(__file__))[0]
         self.work_dir = path.dirname(path.abspath(__file__))
+        utils.send_mail("Started.")
 
     def exec(self):
         try:
@@ -42,4 +44,5 @@ if __name__ == '__main__':
         obj.exec()
     except Exception as e:
         traceback.print_exc()
+        utils.send_mail("An error has occurred.")
 sys.exit(1)
