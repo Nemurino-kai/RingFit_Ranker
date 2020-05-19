@@ -1,0 +1,48 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}About{% endblock %}
+
+{% block content %}
+<div class="container">
+
+<header>
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="">RingFit Ranker</a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            <li><a href="/">Ranking</a></li>
+            <li class="active"><a href="about">About<span class="sr-only">(current)</span></a></li>
+           </ul>
+         </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>
+</header>
+<main>
+    <h1>RingFit Rankerとは？</h1>
+    Twitter上の #リングフィットアドベンチャー の画像を収集し、順位を呟くbotです。<br>
+    <a href="https://twitter.com/RingFitRanker">twitter.com/RingFitRanker</a> で運営中
+    <h2>機能1</h2>
+    アカウントをフォローしたうえで、<b>#リングフィットアドベンチャー</b> タグを付けて運動結果をツイートすると、順位をリプライします。
+    <h2>機能2</h2>
+    毎日0時頃に、消費カロリー数ランキング Top3を呟きます。<br>
+</main>
+</div>
+
+    <footer class="footer">
+      <div class="container">
+        <p class="text-muted">RingFit Ranker by @DoubleZ_prog<br>This is unofficial site.</p>
+      </div>
+    </footer>
+
+{% endblock %}
