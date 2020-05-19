@@ -29,15 +29,14 @@ def auth_twitter():
 
 
 # 運動記録をツイッター上から検索し、データベースに追加する, フォローしてくれている人にはリプライする。
-def search_exercise_data(api, max_number=100):
+def search_exercise_data(api, max_number=300):
     conn = sqlite3.connect(config.DATABASE_NAME)
     cur = conn.cursor()
-    player_num=0
     # フォローしてくれている人を取得
     follower_id = api.followers_ids()
-    for tweet in tweepy.Cursor(api.search, q=f'#リングフィットアドベンチャー -filter:retweets filter:images OR @{TWITTER_ID}'
-    f' OR #リングフィットランカー -filter:retweets filter:images -from:{TWITTER_ID}').items(max_number * 10):
-        print(tweet.text)
+
+    for tweet in tweepy.Cursor(api.search, q=f'#リングフィットアドベンチャー -filter:retweets filter:images',tweet_mode="extended").items(max_number):
+        print(tweet.full_text)
         # idが重複していたら、すでにそこまで検索してあるので中断
         cur.execute("select count(*) from Exercise where tweet_id == ?", (tweet.id,))
         if int(cur.fetchone()[0]): return
@@ -60,13 +59,22 @@ def search_exercise_data(api, max_number=100):
                 print(tweet.user.screen_name," さんにお返事します")
                 reply_exercise_result(api,cur,exercise_data,tweet)
 
-            player_num = player_num+1
-
-            if player_num >= max_number:
-                return
         except tweepy.error.TweepError:
             import traceback
             traceback.print_exc()
+
+# @{TWITTER_ID}へのリプに対し、順位を返信する。
+# TODO:開発中/まだ使えません
+def reply_ranking(api,item_num=100):
+    for tweet in tweepy.Cursor(api.search, q=f'@{TWITTER_ID}',tweet_mode="extended").items(item_num):
+        print(tweet.full_text)
+        # ツイートに順位 が含まれているなら、順位をリプライする
+        if not "順位" in tweet.full_text:
+            pass
+        conn = sqlite3.connect(config.DATABASE_NAME)
+        cur = conn.cursor()
+        # user_idからカロリーを抽出
+        cur.execute("select kcal from Exercise where user_id == ?", (tweet.user.id,))
 
 
 
@@ -90,7 +98,9 @@ def tweet_ranking(api):
 # 運動結果の画像を取得出来たらtrue,できなかったらfalseを返す
 def fetch_image(status):
     # mediaがなければ飛ばす
-    if not hasattr(status, 'extended_entities'): return False
+    if not hasattr(status, 'extended_entities'):
+        print("Media not found.")
+        return False
     # mediaを保存する
     media_url = status.extended_entities['media'][0]['media_url']
     try:
@@ -100,7 +110,9 @@ def fetch_image(status):
         print("save miss")
         return False
     # 運動結果の画像でなければ飛ばす
-    if not info_convert.is_result_image(): return False
+    if not info_convert.is_result_image():
+        print("Media is not exercise image.")
+        return False
     return True
 
 def reply_exercise_result(api,cur,exercise_data,status):
