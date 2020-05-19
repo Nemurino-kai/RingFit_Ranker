@@ -11,7 +11,7 @@ def send_mail(text):
     # 取得した16桁パスワードを入力する
     mail_pass = config.MAIL_PASS
 
-    message = MIMEText('Hello')
+    message = MIMEText(text)
     message['Subject'] = text
     message['From'] = from_addr
     message['To'] = to_addr
@@ -20,3 +20,6 @@ def send_mail(text):
     sender.login(mail_id, mail_pass)
     sender.sendmail(from_addr, to_addr, message.as_string())
     sender.quit()
+
+if __name__ == '__main__':
+    send_mail("test")
