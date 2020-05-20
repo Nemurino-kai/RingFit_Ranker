@@ -70,7 +70,11 @@ def read_cal_by_tesseract(image):
     .replace('Q','9').replace('g','9')
 
     # 数字以外はすべて取り除き、intにする
-    retext = int(re.sub('[^0-9]','', retext))
+    try:
+        retext = int(re.sub('[^0-9]','', retext))
+    except ValueError as e:
+        print("this is empty!")
+        retext = 0
 
     # kcalが4桁はあり得ないのでエラー
     try:
@@ -158,6 +162,7 @@ def convert_datatuple_to_callist(exercise_data_list):
 
 
 def datalist_to_histogram(exercise_list, ranking):
+    plt.figure()
     n, bins, patches = plt.hist(exercise_list, color='darkturquoise', ec='black', bins=30)
     print(n, bins)
     print(exercise_list[ranking])
@@ -180,10 +185,11 @@ if __name__ == '__main__':
                 "WHERE date(time_stamp) == date('now', '+9 hours') and kcal < 150 ORDER BY kcal DESC ;")
     exercise_data_list = cur.fetchall()
     print(exercise_data_list)
-    num_list = convert_datatuple_to_callist(exercise_data_list)
+    #num_list = convert_datatuple_to_callist(exercise_data_list)
 
-    #num_list = [0, 10, 10, 10, 10.1, 30, 30, 30, 30.2, 40, 50, 70, 90, 200]
+    num_list = [0, 10, 10, 10, 10.1, 30, 30, 30, 30.2, 40, 50, 70, 90, 200]
     time_ranking =10
+    plt.figure()
     n, bins, patches = plt.hist(num_list, color='darkturquoise', ec='black', bins=30)
     print(n, bins)
     print(np.where(num_list[time_ranking] >= bins)[0])
