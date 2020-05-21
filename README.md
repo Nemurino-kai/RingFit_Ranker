@@ -13,8 +13,8 @@ https://twitter.com/RingFitRanker で運営中
 
 ![C14](https://user-images.githubusercontent.com/40136659/82156678-9dacb500-98b7-11ea-9423-aba5b48f124c.png)
 
-## 近く実装予定
-- 全員分の順位が見れるページを製作中です
+## 機能3
+- http://ringfit.work から、全員分の順位が見れます
 
 ![ta](https://user-images.githubusercontent.com/40136659/82156594-f62f8280-98b6-11ea-83dd-6f7272fa24e2.png)
 
