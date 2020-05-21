@@ -8,12 +8,12 @@ https://twitter.com/RingFitRanker で運営中
 ![image1](https://user-images.githubusercontent.com/40136659/82156108-2e819180-98b4-11ea-9bab-dbfe2e5b1b84.jpg)
 ![image2](https://user-images.githubusercontent.com/40136659/82156109-304b5500-98b4-11ea-852a-880a3031e7db.jpg)
 
-## 機能2
+## 機能２
 - 毎日0時頃に、消費カロリー数ランキング Top3を呟きます。
 
 ![C14](https://user-images.githubusercontent.com/40136659/82156678-9dacb500-98b7-11ea-9423-aba5b48f124c.png)
 
-## 機能3
+## 機能３
 - http://ringfit.work から、全員分の順位が見れます
 
 ![ta](https://user-images.githubusercontent.com/40136659/82156594-f62f8280-98b6-11ea-83dd-6f7272fa24e2.png)
