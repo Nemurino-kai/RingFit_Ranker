@@ -19,6 +19,9 @@ https://twitter.com/RingFitRanker で運営中
 ![ta](https://user-images.githubusercontent.com/40136659/82156594-f62f8280-98b6-11ea-83dd-6f7272fa24e2.png)
 
 ## 開発者向けのメッセージ
-Sqlite3により、DBにデータを保持しています。<br>
+### システム構成図
+![ranker](https://user-images.githubusercontent.com/40136659/82590990-977d4800-9bd9-11ea-898a-369598a34226.png)
+
+### 使用方法
 bot_deamon.py を実行することで、常駐させることが可能です。
 config.py にTwitterのAPI Tokenを記入し、他ファイルと同じディレクトリに置いてください。
