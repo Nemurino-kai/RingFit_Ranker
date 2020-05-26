@@ -4,6 +4,7 @@ import datetime
 import config
 import time
 import urllib
+import random
 import info_convert
 import sqlite3
 from tqdm import tqdm
@@ -59,6 +60,7 @@ def search_exercise_data(api, max_number=300):
                 print(tweet.user.screen_name," さんにお返事します")
                 reply_exercise_result(api,cur,exercise_data,tweet)
 
+
         except tweepy.error.TweepError:
             import traceback
             traceback.print_exc()
@@ -83,9 +85,14 @@ def tweet_ranking(api):
     conn = sqlite3.connect(config.DATABASE_NAME)
     cur = conn.cursor()
     # DBから前日分の運動結果を抽出し、消費カロリーの多い順でソート
-    # +9hours-24hours=15hours(時差-24時間分で前日のdataを取得)
+    # 昨日の04:00:00 から 今日の03:59:59まで
+    now = datetime.datetime.now(JST)
+    yesterday = now - datetime.timedelta(days=1)
+    start_t = yesterday.strftime("%Y-%m-%d ") + "04:00:00"
+    stop_t = now.strftime("%Y-%m-%d ") + "03:59:59"
+    params = (start_t, stop_t)
     cur.execute("select user_name,kcal from Exercise "
-                "WHERE date(time_stamp) == date('now', '-15 hours') ORDER BY kcal DESC ;")
+                "WHERE  time_stamp BETWEEN ? AND ? ORDER BY kcal DESC ;",params)
     exerise_data_list = cur.fetchall()
     tweet = "今日のランキング発表！\n"
     for i, exercise_data in enumerate(exerise_data_list):
@@ -116,17 +123,33 @@ def fetch_image(status):
     return True
 
 def reply_exercise_result(api,cur,exercise_data,status):
-    # DBから今日の分のデータを抽出し、消費カロリー順でソート
+
+    if datetime.datetime.now(JST).hour < 4:
+        # 昨日の4時～今
+        now = datetime.datetime.now(JST)
+        yesterday = now - datetime.timedelta(days=1)
+        stop_t = now.strftime("%Y-%m-%d %H:%M:%S")
+        start_t = yesterday.strftime("%Y-%m-%d ") + "04:00:00"
+        params = (start_t,stop_t)
+    else:
+        # 今日の4時～今
+        now = datetime.datetime.now(JST)
+        stop_t = now.strftime("%Y-%m-%d %H:%M:%S")
+        start_t = now.strftime("%Y-%m-%d ") + "04:00:00"
+        params = (start_t,stop_t)
+
+    # DBから今日の順位分のデータを抽出し、消費カロリー順でソート
+
     cur.execute("select kcal from Exercise "
-                "WHERE date(time_stamp) == date('now', '+9 hours') ORDER BY kcal DESC ;")
+                "WHERE time_stamp BETWEEN ? AND ? ORDER BY kcal DESC ;",params)
     exercise_data_list = cur.fetchall()
     print(exercise_data)
 
     # 消費カロリーの順位を計算する
     # tuple にするためカンマをつけている
-    params = (exercise_data.exercise_cal,)
+    params = (exercise_data.exercise_cal,start_t,stop_t)
     cur.execute("select count(*) from Exercise WHERE Exercise.kcal > ? "
-                "AND date(time_stamp) == date('now', '+9 hours')", params)
+                "AND time_stamp BETWEEN ? AND ?", params)
     cal_ranking = int(cur.fetchone()[0])
     print(cal_ranking)
 
@@ -158,7 +181,7 @@ def tweet():
 
     api = auth_twitter()
 
-    # データを検索した日時を記録
+    # ランキングを呟いた日時を記録する変数
     last_data_update_time = datetime.datetime.now(JST)
     # --------------------------------------------------------------
 
@@ -167,15 +190,15 @@ def tweet():
         print("画像を検索")
         search_exercise_data(api)
 
-        # 前回のデータ更新から2時間が経っているかつ、0時台なら
-        if datetime.datetime.now(JST) - last_data_update_time > datetime.timedelta(hours=2) and datetime.datetime.now(
-                JST).hour == 0:
+        # 前回のデータ更新から1時間が経っているかつ、12時台なら
+        if datetime.datetime.now(JST) - last_data_update_time > datetime.timedelta(hours=1) and datetime.datetime.now(
+                JST).hour == 12:
             last_data_update_time = datetime.datetime.now(JST)
             # ランキングを呟く
             tweet_ranking(api)
 
         print("5分sleep")
-        [time.sleep(10) for i in tqdm(range(30))]
+        time.sleep(300)
 
 
 if __name__ == '__main__':
