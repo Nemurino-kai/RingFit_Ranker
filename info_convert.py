@@ -173,6 +173,7 @@ def datalist_to_histogram(exercise_list, ranking):
     # y軸を整数にする
     plt.gca().get_yaxis().set_major_locator(ticker.MaxNLocator(integer=True))
     plt.savefig('hist.png')  # ヒストグラムを保存
+    plt.close()
 
 
 if __name__ == '__main__':
