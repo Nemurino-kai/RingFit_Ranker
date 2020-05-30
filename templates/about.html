@@ -2,6 +2,13 @@
 
 {% block title %}About{% endblock %}
 
+{% import "bootstrap/google.html" as google %}
+
+{% block scripts %}
+{{super()}}
+{{google.uanalytics('UA-168052698-1')}}
+{% endblock %}
+
 {% block content %}
 <div class="container">
 
