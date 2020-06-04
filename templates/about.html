@@ -10,7 +10,6 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
 
 <header>
     <nav class="navbar navbar-default">
@@ -21,7 +20,6 @@
             <span class="sr-only">Toggle navigation</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
           </button>
           <a class="navbar-brand" href="">RingFit Ranker</a>
         </div>
@@ -29,12 +27,15 @@
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
           <ul class="nav navbar-nav">
             <li><a href="/">Ranking</a></li>
-            <li class="active"><a href="about">About<span class="sr-only">(current)</span></a></li>
+            <li class="active"><a href="about">About</a></li>
            </ul>
          </div><!-- /.navbar-collapse -->
       </div><!-- /.container-fluid -->
     </nav>
 </header>
+
+<div class="container">
+
 <main>
     <h1>RingFit Rankerとは？</h1>
     Twitter上の #リングフィットアドベンチャー の画像を収集し、順位を呟くbotです。<br>
@@ -44,12 +45,10 @@
     <h2>機能2</h2>
     毎日4時ごろに順位を集計し、12時頃に消費カロリー数ランキング Top3を呟きます。<br>
 </main>
+
+    {% include "footer.html" %}
+
 </div>
 
-    <footer class="footer">
-      <div class="container">
-        <p class="text-muted">RingFit Ranker by @DoubleZ_prog<br>This is unofficial site.</p>
-      </div>
-    </footer>
 
 {% endblock %}
