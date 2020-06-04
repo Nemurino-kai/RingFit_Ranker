@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 
 def rotate_image(mat, angle):
  # angle in degrees
@@ -19,3 +20,13 @@ def rotate_image(mat, angle):
 
  rotated_mat = cv2.warpAffine(mat, rotation_mat, (bound_w, bound_h),borderValue=(255, 255, 255))
  return rotated_mat
+
+def skew_image(mat):
+    height, width = mat.shape[:2]
+    pts1 = np.float32([[130, 0], [185, 0], [117, 82]])
+    pts2 = np.float32([[117, 0], [172, 0], [117, 82]])
+
+    M = cv2.getAffineTransform(pts1, pts2)
+
+    dst = cv2.warpAffine(mat, M,(width,height),borderValue=(255, 255, 255))
+    return dst

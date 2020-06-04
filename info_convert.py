@@ -39,11 +39,12 @@ def read_text(image):
     return texts
 
 def read_cal_by_tesseract(image):
-    image = image_processing.rotate_image(image, 7)
+    image = image_processing.skew_image(image)
 
     # 大津の二値化をしておく
     im_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     _, image = cv2.threshold(im_gray, 0, 255, cv2.THRESH_OTSU)
+
     image = Image.fromarray(image)
 
     tools = pyocr.get_available_tools()
@@ -67,7 +68,7 @@ def read_cal_by_tesseract(image):
     # よくある誤字を修正
     retext = txt.replace(' ', '').replace('i', '1').replace(']', '1').replace('t', '1')\
         .replace('?','2').replace('O','0').replace('A','4').replace('l','1').replace('I','1')\
-    .replace('Q','9').replace('g','9')
+    .replace('Q','9').replace('g','9').replace('/','7')
 
     # 数字以外はすべて取り除き、intにする
     try:
@@ -202,3 +203,14 @@ if __name__ == '__main__':
     plt.gca().get_yaxis().set_major_locator(ticker.MaxNLocator(integer=True))
     plt.savefig('hist.png')
     plt.show()
+
+    fetch_image = cv2.imread('images/unofficial.jpg')
+
+    # 各部分の画像を切り出す
+    total_cal = fetch_image[396:396 + 65, 586:586 + 228]
+
+    # time = read_time(total_time)
+    # dummyData
+    time = datetime.time(second=0)
+    cal = read_cal_by_tesseract(total_cal)
+
