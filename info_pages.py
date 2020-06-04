@@ -1,14 +1,12 @@
 # coding: utf-8
 from flask import Flask, render_template,request
 from flask_bootstrap import Bootstrap
-from flask_datepicker import datepicker
 import config
 import sqlite3
 import datetime
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
-datepicker(app)
 
 # タイムゾーン指定
 JST = datetime.timezone(datetime.timedelta(hours=+9), 'JST')
@@ -53,7 +51,6 @@ def index():
 
 
     exercise_data_list = cur.fetchall()
-    print(exercise_data_list)
     return render_template('index.html',results = exercise_data_list,start_t = start_t,start_day=start_day,stop_t=stop_t,max_day=max_day)
 
 @app.route('/about')
