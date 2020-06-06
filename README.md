@@ -23,5 +23,17 @@ https://twitter.com/RingFitRanker で運営中
 ![ranker](https://user-images.githubusercontent.com/40136659/82590990-977d4800-9bd9-11ea-898a-369598a34226.png)
 
 ### 使用方法
-bot_deamon.py を実行することで、常駐させることが可能です。
-config.py にTwitterのAPI Tokenを記入し、他ファイルと同じディレクトリに置いてください。
+npm のforeverコマンドを用いるなどして、tweet_bot.py を常駐させてください。
+config.pyは以下の通り設定し、他ファイルと同じディレクトリに置いてください。
+
+```
+CONSUMER_KEY = "ここに"
+CONSUMER_SECRET = "Twitterの"
+ACCESS_TOKEN = "Tokenを"
+ACCESS_TOKEN_SECRET = "いれる"
+TO_ADDR = '障害発生時の報告メール送信先'
+FROM_ADDR = '障害発生時の報告メール送信元'
+MAIL_PASS = 'Googleのアプリパスワード'
+TWITTER_ID = "RingFitRanker(呟くアカウントのTwitter_ID)"
+DATABASE_NAME = "運動記録を保存するデータベースの名前"
+```
