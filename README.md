@@ -26,7 +26,7 @@ https://twitter.com/RingFitRanker で運営中
 npm のforeverコマンドを用いるなどして、tweet_bot.py を常駐させてください。
 config.pyは以下の通り設定し、他ファイルと同じディレクトリに置いてください。
 
-```
+```python
 CONSUMER_KEY = "ここに"
 CONSUMER_SECRET = "Twitterの"
 ACCESS_TOKEN = "Tokenを"
