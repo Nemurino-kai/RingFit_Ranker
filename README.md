@@ -23,8 +23,8 @@ https://twitter.com/RingFitRanker で運営中
 ![ranker](https://user-images.githubusercontent.com/40136659/82590990-977d4800-9bd9-11ea-898a-369598a34226.png)
 
 ### 使用方法
-npm のforeverコマンドを用いるなどして、tweet_bot.py を常駐させてください。
-例：``` forever start -c python3 tweet_bot.py  ```
+npm のforeverコマンドを用いるなどして、tweet_bot.py を常駐させてください。<br>
+例：``` forever start -c python3 tweet_bot.py  ```<br>
 config.pyは以下の通り設定し、他ファイルと同じディレクトリに置いてください。
 
 ```python
@@ -38,3 +38,5 @@ MAIL_PASS = 'Googleのアプリパスワード'
 TWITTER_ID = "RingFitRanker(呟くアカウントのTwitter_ID)"
 DATABASE_NAME = "運動記録を保存するデータベースの名前"
 ```
+
+uwsgiについては、``` uwsgi --ini uwsgi_config.ini ``` で立ち上げてください。
