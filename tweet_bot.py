@@ -7,6 +7,8 @@ import urllib
 import random
 import info_convert
 import sqlite3
+import utils
+import traceback
 from tqdm import tqdm
 
 # TwitterのAPI_TOKEN
@@ -202,4 +204,10 @@ def tweet():
 
 
 if __name__ == '__main__':
-    tweet()
+    try:
+        utils.send_mail("Started.", "プログラムを起動しました。")
+        tweet()
+    except Exception as e:
+        utils.send_mail("An error has occurred.", traceback.format_exc())
+        time.sleep(60)
+
