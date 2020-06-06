@@ -24,6 +24,7 @@ https://twitter.com/RingFitRanker で運営中
 
 ### 使用方法
 npm のforeverコマンドを用いるなどして、tweet_bot.py を常駐させてください。
+例：``` forever start -c python3 tweet_bot.py  ```
 config.pyは以下の通り設定し、他ファイルと同じディレクトリに置いてください。
 
 ```python
