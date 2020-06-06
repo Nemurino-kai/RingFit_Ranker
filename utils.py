@@ -4,7 +4,7 @@ import smtplib
 import config
 from email.mime.text import MIMEText
 
-def send_mail(text):
+def send_mail(title,text):
     to_addr = config.TO_ADDR
     from_addr = config.FROM_ADDR
     mail_id = from_addr
@@ -12,7 +12,7 @@ def send_mail(text):
     mail_pass = config.MAIL_PASS
 
     message = MIMEText(text)
-    message['Subject'] = text
+    message['Subject'] = title
     message['From'] = from_addr
     message['To'] = to_addr
 
