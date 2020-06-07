@@ -14,9 +14,9 @@ https://twitter.com/RingFitRanker で運営中
 ![C14](https://user-images.githubusercontent.com/40136659/82156678-9dacb500-98b7-11ea-9423-aba5b48f124c.png)
 
 ## 機能３
-- http://ringfit.work から、全員分の順位が見れます
-
-![ta](https://user-images.githubusercontent.com/40136659/82156594-f62f8280-98b6-11ea-83dd-6f7272fa24e2.png)
+- http://ringfit.work から、全員分の順位が見れます。
+- 過去の日付の順位を見ることも可能です。ページネーションに対応しています。
+![C42](https://user-images.githubusercontent.com/40136659/83976183-6c158f80-a933-11ea-826c-5eafd284278b.png)
 
 ## 開発者向けのメッセージ
 ### システム構成図
