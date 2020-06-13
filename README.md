@@ -39,4 +39,4 @@ TWITTER_ID = "RingFitRanker(呟くアカウントのTwitter_ID)"
 DATABASE_NAME = "運動記録を保存するデータベースの名前"
 ```
 
-uwsgiについては、``` uwsgi --ini uwsgi_config.ini ``` で立ち上げてください。
+uwsgiについては、``` uwsgi --ini uwsgi_config.ini ``` で立ち上げられます。
