@@ -37,6 +37,8 @@ FROM_ADDR = '障害発生時の報告メール送信元'
 MAIL_PASS = 'Googleのアプリパスワード'
 TWITTER_ID = "RingFitRanker(呟くアカウントのTwitter_ID)"
 DATABASE_NAME = "運動記録を保存するデータベースの名前"
+RANKING_FONT = "ランキング画像のユーザ名に用いるフォント"
+KCAL_FONT = "ランキング画像の消費カロリーに用いるフォント"
 ```
 
 uwsgiについては、``` uwsgi --ini uwsgi_config.ini ``` で立ち上げられます。
