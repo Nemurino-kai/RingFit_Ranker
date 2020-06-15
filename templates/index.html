@@ -45,6 +45,11 @@
 
 <div class="container">
 
+
+
+
+    <h2 >Exercise Ranking</h2> <div class="text-muted">({{start_t}} ～ {{stop_t}})</div>
+    <hr style="margin-top:0.5em;margin-bottom:1em;">
                 <div class="form-inline">
                     <form class="form-group">
                         <label>集計日</label>
@@ -52,9 +57,9 @@
                         <button type="submit"  class="btn btn-primary">集計する</button>
                     </form>
                 </div>
+    <div style="text-align:center;">{{ pagination.links }}</div>
 
 
-    <h2>Exercise Ranking</h2> <div class="text-muted">({{start_t}} ～ {{stop_t}})</div>
           <div class="table-responsive">
             <table class="table table-striped table-sm">
               <thead>
@@ -78,6 +83,9 @@
                </tbody>
             </table>
           </div>
+    <div style="text-align:center;">{{ pagination.links }}</div>
+    <div style="text-align:center;">{{ pagination.info }}</div>
+
 
 {% include "footer.html" %}
 

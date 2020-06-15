@@ -1,6 +1,7 @@
 # coding: utf-8
 from flask import Flask, render_template,request
 from flask_bootstrap import Bootstrap
+from flask_paginate import Pagination, get_page_parameter
 import config
 import sqlite3
 import datetime
@@ -51,7 +52,13 @@ def index():
 
 
     exercise_data_list = cur.fetchall()
-    return render_template('index.html',results = exercise_data_list,start_t = start_t,start_day=start_day,stop_t=stop_t,max_day=max_day)
+
+    page = request.args.get(get_page_parameter(), type=int, default=1)
+    res = exercise_data_list[(page - 1) * 100: page * 100]
+    pagination = Pagination(page=page, total=len(exercise_data_list), per_page=100, css_framework='bootstrap4')
+
+    return render_template('index.html',results = res,start_t = start_t,start_day=start_day,
+                           stop_t=stop_t,max_day=max_day, pagination=pagination)
 
 @app.route('/about')
 def about():
