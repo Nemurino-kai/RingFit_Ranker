@@ -34,7 +34,6 @@ def tweet():
 
         print("画像を検索")
         search_exercise_data(api)
-        tweet_ranking(api)
 
         # 前回のデータ更新から1時間が経っているかつ、12時台なら
         if datetime.datetime.now(JST) - last_data_update_time > datetime.timedelta(hours=1) and datetime.datetime.now(

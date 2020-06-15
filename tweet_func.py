@@ -91,39 +91,27 @@ def make_ranking_picture(exercise_data_list):
     W, H = (1200, 630)
 
     # 枠幅
-    W_song = 400
+    W_song = 390
 
-    # タイトルのフォントサイズとフォント種類
-    font_size_title = 70
-    font_title = ImageFont.truetype('./fonts/mplus-1p-black.ttf',font_size_title)
     # ユーザ名のフォントサイズとフォント種類
     font_size_ranking = 35
-    font_ranking = ImageFont.truetype('./fonts/mplus-1p-regular.ttf',font_size_ranking)
+    font_ranking = ImageFont.truetype(config.RANKING_FONT,font_size_ranking)
     # 消費カロリーのフォントサイズとフォント種類
     font_size_point = 25
-    font_point = ImageFont.truetype('./fonts/mplus-1p-regular.ttf',font_size_point)
+    font_point = ImageFont.truetype(config.KCAL_FONT,font_size_point)
 
     # 標準のフォントカラー
-    font_color = (0, 0, 200)
+    font_color = (200, 0, 0)
     # 消費カロリー用のフォントカラー
-    font_color_point = (0, 0, 150)
-
-    # タイトル
-    title = "消費カロリー ベスト10"
-    # タイトルフォントの設定
-    draw.font = font_title
-    # テキストサイズ取得
-    w_title, h_title = draw.textsize(title)
-    # タイトル描画
-    draw.text(((W - w_title) / 2, 20), title, font_color)
+    font_color_point = (150, 0, 0)
 
     # ランキング
     for i, exercise_data in enumerate(exercise_data_list):
         user_name = exercise_data[0]
         kcal = f"{exercise_data[1]}kcal"
 
-        # 1位から５位、6位から10位でポジションを変更
-        w_pos_s = 0 if i < 5 else 600
+        # 1位から5位、6位から10位でポジションを変更
+        w_pos_s = 15 if i < 5 else 610
         w_pos_p = 0 if i < 5 else 605
         h_pos = i if i < 5 else i - 5
 
@@ -138,7 +126,7 @@ def make_ranking_picture(exercise_data_list):
         # 枠をはみ出す場合は縮小する。
         if w_song > W_song:
             font_size = int(font_size_ranking * W_song / w_song)
-            draw.font = ImageFont.truetype('./fonts/mplus-1p-regular.ttf',font_size)
+            draw.font = ImageFont.truetype(config.RANKING_FONT,font_size)
             w_song_n, h_song_n = draw.textsize(user_name)
             draw.text(
                 (85 + w_pos_s, 165 + 97 * h_pos +
@@ -169,7 +157,7 @@ def tweet_ranking(api):
         tweet += f"{i + 1}位 {exercise_data[0]} {exercise_data[1]}kcal\n"
         if i + 1 >= 3: break
     print(tweet)
-    api.update_status(status=tweet)
+    api.update_with_media(status=tweet, filename='./ranking_picture.png')
 
 
 # 運動結果の画像を取得出来たらtrue,できなかったらfalseを返す
