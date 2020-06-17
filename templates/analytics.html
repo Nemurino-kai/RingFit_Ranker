@@ -1,0 +1,101 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}Ranking{% endblock %}
+
+{% import "bootstrap/google.html" as google %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ja.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+{{google.uanalytics('UA-168052698-1')}}
+
+{% endblock %}
+
+
+{% block content %}
+
+<header>
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="">RingFit Ranker</a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="/">Ranking</a></li>
+            <li><a href="about">About</a></li>
+           </ul>
+         </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>
+</header>
+
+<div class="container">
+
+
+
+
+    <h2 >投稿時間 分布</h2> <div class="text-muted">({{start_t}} ～ {{stop_t}})</div>
+    <hr style="margin-top:0.5em;margin-bottom:1em;">
+                <div class="form-inline">
+                    <form class="form-group">
+                        <label>集計日</label>
+                        <input class="flatpickr_start" type="text" placeholder="Select Date.." readonly="readonly" name="day">
+                        <button type="submit"  class="btn btn-primary">集計する</button>
+                    </form>
+                </div>
+<br>
+    <canvas id="ChartDemo"></canvas>
+
+
+
+{% include "footer.html" %}
+
+</div>
+<script>
+const config_start = {
+    maxDate:"{{max_day}}",
+    minDate:"2020-05-18",
+  dateFormat: "Y-m-d",
+  defaultDate: "{{start_day}}",
+  locale:"ja"
+}
+    flatpickr('.flatpickr_start',config_start);
+
+</script>
+
+    <script>
+      var ctx = document.getElementById("ChartDemo").getContext('2d');
+      var ChartDemo = new Chart(ctx, {
+           type: 'line',
+           data: {
+              labels: ["4時","5時","6時","7時","8時","9時","10時","11時","12時","13時","14時","15時","16時","17時","18時","19時","20時","21時","22時","23時","0時","1時","2時","3時"],
+              datasets: [
+              {
+                 label: "{{start_day}} の投稿時間分布",
+                 borderColor: 'rgb(255, 0, 0)',
+                 data: {{n}},
+              },
+              ]
+           },
+           options: {
+              responsive: true,
+           }
+      });
+    </script>
+
+{% endblock %}
