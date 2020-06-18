@@ -4,6 +4,11 @@
 
 {% import "bootstrap/google.html" as google %}
 
+{% block head %}
+{{ super() }}
+<link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
+{% endblock %}
+
 {% block scripts %}
 {{super()}}
 {{google.uanalytics('UA-168052698-1')}}
