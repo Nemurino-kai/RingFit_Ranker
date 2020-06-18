@@ -5,7 +5,6 @@ from flask_paginate import Pagination, get_page_parameter
 import config
 import sqlite3
 import datetime
-import info_convert
 import pandas as pd
 
 app = Flask(__name__)
@@ -48,10 +47,10 @@ def index():
         params = (start_t, stop_t)
 
     print(params)
-    cur.execute("select RANK() OVER(ORDER BY kcal DESC) AS ranking,user_name,kcal,tweeted_time from Exercise "
-                "WHERE  time_stamp BETWEEN ? AND ? ORDER BY kcal DESC ;",params
-    )
 
+    cur.execute("SELECT RANK() OVER(ORDER BY kcal DESC) AS ranking,user_name,kcal,tweeted_time "
+                "FROM (SELECT *, RANK() OVER(PARTITION BY user_screen_name ORDER BY kcal DESC, id) AS rnk FROM Exercise WHERE  time_stamp BETWEEN ? AND ?) tmp "
+                "WHERE rnk = 1 ORDER BY kcal DESC, tweeted_time ASC;",params)
 
     exercise_data_list = cur.fetchall()
 
@@ -106,7 +105,7 @@ def analytics():
 
     exercise_data_list = cur.fetchall()
 
-    exercise_data_list = info_convert.convert_datatuple_to_callist(exercise_data_list)
+    exercise_data_list = [e[0] for e in exercise_data_list]
     df = pd.DataFrame(exercise_data_list, columns=['time_stamp'])
     dateTimeIndex = pd.DatetimeIndex(df['time_stamp'])
     df.index = dateTimeIndex
