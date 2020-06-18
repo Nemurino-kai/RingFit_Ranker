@@ -7,6 +7,7 @@ import random
 import info_convert
 import sqlite3
 from PIL import Image, ImageDraw, ImageFont
+import re
 
 
 # TwitterのAPI_TOKEN
@@ -148,8 +149,12 @@ def tweet_ranking(api):
     start_t = yesterday.strftime("%Y-%m-%d ") + "04:00:00"
     stop_t = now.strftime("%Y-%m-%d ") + "03:59:59"
     params = (start_t, stop_t)
-    cur.execute("select user_name,kcal from Exercise "
-                "WHERE  time_stamp BETWEEN ? AND ? ORDER BY kcal DESC LIMIT 10;",params)
+
+    cur.execute("SELECT user_name,kcal "
+                "FROM (SELECT *, RANK() OVER(PARTITION BY user_screen_name ORDER BY kcal DESC, tweeted_time ASC) AS rnk FROM Exercise WHERE  time_stamp BETWEEN ? AND ?) tmp "
+                "WHERE rnk = 1 ORDER BY kcal DESC, tweeted_time ASC  LIMIT 10;",params)
+
+
     exercise_data_list = cur.fetchall()
     make_ranking_picture(exercise_data_list)
     tweet = "今日のランキング発表！\n"
@@ -204,7 +209,6 @@ def reply_exercise_result(api,cur,exercise_data,status):
     print(exercise_data)
 
     # 消費カロリーの順位を計算する
-    # tuple にするためカンマをつけている
     params = (exercise_data.exercise_cal,start_t,stop_t)
     cur.execute("select count(*) from Exercise WHERE Exercise.kcal > ? "
                 "AND time_stamp BETWEEN ? AND ?", params)
@@ -218,3 +222,7 @@ def reply_exercise_result(api,cur,exercise_data,status):
     info_convert.datalist_to_histogram(info_convert.convert_datatuple_to_callist(exercise_data_list),
                                        cal_ranking)
     api.update_with_media(status=tweet, in_reply_to_status_id=status.id, filename='./hist.png')
+
+if __name__ == '__main__':
+    api = auth_twitter()
+    tweet_ranking(api)
