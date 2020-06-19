@@ -72,11 +72,29 @@ def reply_ranking(api,item_num=100):
         print(tweet.full_text)
         # ツイートに順位 が含まれているなら、順位をリプライする
         if not "順位" in tweet.full_text:
-            pass
+            return
         conn = sqlite3.connect(config.DATABASE_NAME)
         cur = conn.cursor()
+
+        if datetime.datetime.now(JST).hour < 4:
+            # 昨日の4時～今
+            now = datetime.datetime.now(JST)
+            yesterday = now - datetime.timedelta(days=1)
+            stop_t = now.strftime("%Y-%m-%d %H:%M:%S")
+            start_day = yesterday.strftime("%Y-%m-%d")
+            start_t = start_day + " 04:00:00"
+            max_day = start_day
+        else:
+            # 今日の4時～今
+            now = datetime.datetime.now(JST)
+            stop_t = now.strftime("%Y-%m-%d %H:%M:%S")
+            start_day = now.strftime("%Y-%m-%d")
+            start_t = start_day + " 04:00:00"
+            max_day = start_day
+        params = (tweet.user.id,start_t, stop_t)
+
         # user_idからカロリーを抽出
-        cur.execute("select kcal from Exercise where user_id == ?", (tweet.user.id,))
+        cur.execute("SELECT kcal FROM Exercise WHERE user_id == ? AND time_stamp BETWEEN ? AND ?",params)
 
 
 def make_ranking_picture(exercise_data_list):
