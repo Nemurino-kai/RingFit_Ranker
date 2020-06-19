@@ -50,7 +50,10 @@ if __name__ == '__main__':
     try:
         utils.send_mail("Started.", "プログラムを起動しました。")
         tweet()
-    except Exception as e:
+    except (Exception,tweepy.error.TweepError) as e:
+        traceback.print_exc()
         utils.send_mail("An error has occurred.",  traceback.format_exc())
-    except tweepy.error.TweepError as e:
+        raise e
+    except:
+        traceback.print_exc()
         utils.send_mail("An error has occurred.",  traceback.format_exc())
