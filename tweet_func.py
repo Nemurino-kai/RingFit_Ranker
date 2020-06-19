@@ -60,10 +60,6 @@ def search_exercise_data(api, max_number=300):
             if tweet.user.id in follower_id:
                 print(tweet.user.screen_name," さんにお返事します")
                 reply_exercise_result(api,cur,exercise_data,tweet)
-            else:
-                if random.random() >0.95:
-                    print(tweet.user.screen_name, " さんにいいねします")
-                    api.create_favorite(tweet.id)
 
         except tweepy.error.TweepError:
             import traceback
