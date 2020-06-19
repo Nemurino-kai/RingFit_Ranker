@@ -2,10 +2,6 @@ import cv2
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
-# Imports the Google Cloud client library
-from google.cloud import vision
-from google.cloud.vision import types
-import os
 import re
 import datetime
 import numpy as np
@@ -15,7 +11,6 @@ import sys
 import pyocr.builders
 import image_processing
 
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = './client_credentials.json'
 THRESHOLD = 0.95
 TEMPLATE = cv2.imread('template.jpg')
 
@@ -26,17 +21,6 @@ class ExerciseData:
         self.exercise_cal = cal
         self.user_name = user_name
 
-
-def read_text(image):
-    # Instantiates a client
-    client = vision.ImageAnnotatorClient()
-    # Performs text detection on the image file
-    _, decode_image = cv2.imencode('.jpg', image)
-    decode_image = decode_image.tobytes()
-    decode_image = types.Image(content=decode_image)
-    response = client.text_detection(image=decode_image)
-    texts = response.text_annotations
-    return texts
 
 def read_cal_by_tesseract(image):
     image = image_processing.skew_image(image)
@@ -66,58 +50,27 @@ def read_cal_by_tesseract(image):
     print(txt)
 
     # よくある誤字を修正
-    retext = txt.replace(' ', '').replace('i', '1').replace(']', '1').replace('t', '1')\
-        .replace('?','2').replace('O','0').replace('A','4').replace('l','1').replace('I','1')\
-    .replace('Q','9').replace('g','9').replace('/','7')
+    retext = txt.replace(' ', '').replace('i', '1').replace(']', '1').replace('t', '1') \
+        .replace('?', '2').replace('O', '0').replace('A', '4').replace('l', '1').replace('I', '1') \
+        .replace('Q', '9').replace('g', '9').replace('/', '7')
 
     # 数字以外はすべて取り除き、intにする
     try:
-        retext = int(re.sub('[^0-9]','', retext))
+        retext = int(re.sub('[^0-9]', '', retext))
     except ValueError as e:
         print("this is empty!")
         retext = 0
 
     # kcalが4桁はあり得ないのでエラー
     try:
-        if(retext >999):
+        if (retext > 999):
             raise ValueError("Cal is too large!")
     except ValueError as e:
         print(e)
-        retext = int(re.sub('[^0-9]','', txt))
+        retext = int(re.sub('[^0-9]', '', txt))
 
     if str(retext) != txt: print("Text is replaced.")
     return int(retext)
-
-
-def read_time(time_image):
-    texts = read_text(time_image)
-    # 数字だけを抽出する
-    regex = re.compile(r'\d+')
-    time_array = []
-    for line in str(texts[0].description).splitlines():
-        match = regex.findall(line)
-        time_array.extend(match)
-    print(time_array)
-    # time型に変換
-    try:
-        if len(time_array) == 1:
-            return datetime.time(second=int(time_array[0]))
-        if len(time_array) == 2:
-            return datetime.time(minute=int(time_array[0]), second=int(time_array[1]))
-        if len(time_array) == 3:
-            return datetime.time(hour=int(time_array[0]), minute=int(time_array[1]), second=int(time_array[2]))
-    except:
-        print("Can't Read Error")
-        # TODO: Error処理をきちんとする
-        return datetime.time(second=0)
-
-
-def read_cal(cal_image):
-    texts = read_text(cal_image)
-    for text in texts:
-        print(text.description)
-    # 小数付きでkcalを返す
-    return float(re.findall(r"[-+]?\d*\.\d+|\d+", texts[0].description)[0])
 
 
 def is_result_image():
@@ -169,7 +122,7 @@ def datalist_to_histogram(exercise_list, ranking):
     print(exercise_list[ranking])
     print("xは", np.where(exercise_list[ranking] >= bins)[0][-1])
     x = np.where(exercise_list[ranking] >= bins)[0][-1]
-    if x==30: x= x-1
+    if x == 30: x = x - 1
     patches[x].set_facecolor('tomato')
     # y軸を整数にする
     plt.gca().get_yaxis().set_major_locator(ticker.MaxNLocator(integer=True))
@@ -180,6 +133,7 @@ def datalist_to_histogram(exercise_list, ranking):
 if __name__ == '__main__':
     import sqlite3
     import config
+
     # ヒストグラムのテスト
     conn = sqlite3.connect(config.DATABASE_NAME)
     cur = conn.cursor()
@@ -187,10 +141,10 @@ if __name__ == '__main__':
                 "WHERE date(time_stamp) == date('now', '+9 hours') and kcal < 150 ORDER BY kcal DESC ;")
     exercise_data_list = cur.fetchall()
     print(exercise_data_list)
-    #num_list = convert_datatuple_to_callist(exercise_data_list)
+    # num_list = convert_datatuple_to_callist(exercise_data_list)
 
     num_list = [0, 10, 10, 10, 10.1, 30, 30, 30, 30.2, 40, 50, 70, 90, 200]
-    time_ranking =10
+    time_ranking = 10
     plt.figure()
     n, bins, patches = plt.hist(num_list, color='darkturquoise', ec='black', bins=30)
     print(n, bins)
@@ -198,13 +152,13 @@ if __name__ == '__main__':
 
     print(np.where(num_list[time_ranking] >= bins)[0][-1])
     x = np.where(num_list[time_ranking] >= bins)[0][-1]
-    if x==20:x = 19
+    if x == 20: x = 19
     patches[x].set_facecolor('tomato')
     plt.gca().get_yaxis().set_major_locator(ticker.MaxNLocator(integer=True))
     plt.savefig('hist.png')
     plt.show()
 
-    fetch_image = cv2.imread('images/unofficial.jpg')
+    fetch_image = cv2.imread('images/badsmall.jpg')
 
     # 各部分の画像を切り出す
     total_cal = fetch_image[396:396 + 65, 586:586 + 228]
@@ -213,4 +167,3 @@ if __name__ == '__main__':
     # dummyData
     time = datetime.time(second=0)
     cal = read_cal_by_tesseract(total_cal)
-
