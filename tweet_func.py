@@ -195,31 +195,22 @@ def fetch_image(status):
 
 def reply_exercise_result(api,cur,exercise_data,status):
 
-    if datetime.datetime.now(JST).hour < 4:
-        # 昨日の4時～今
-        now = datetime.datetime.now(JST)
-        yesterday = now - datetime.timedelta(days=1)
-        stop_t = now.strftime("%Y-%m-%d %H:%M:%S")
-        start_t = yesterday.strftime("%Y-%m-%d ") + "04:00:00"
-        params = (start_t,stop_t)
-    else:
-        # 今日の4時～今
-        now = datetime.datetime.now(JST)
-        stop_t = now.strftime("%Y-%m-%d %H:%M:%S")
-        start_t = now.strftime("%Y-%m-%d ") + "04:00:00"
-        params = (start_t,stop_t)
+    now = datetime.datetime.now(JST)
+    ranking_datetime = now - datetime.timedelta(hours=4)
+    ranking_datetime = ranking_datetime.strftime("%Y-%m-%d")
+    params=(ranking_datetime,)
 
     # DBから今日の順位分のデータを抽出し、消費カロリー順でソート
 
     cur.execute("select kcal from Exercise "
-                "WHERE time_stamp BETWEEN ? AND ? ORDER BY kcal DESC ;",params)
+                "WHERE date(datetime(time_stamp,'-4 hours'))==? ORDER BY kcal DESC ;",params)
     exercise_data_list = cur.fetchall()
     print(exercise_data)
 
     # 消費カロリーの順位を計算する
-    params = (exercise_data.exercise_cal,start_t,stop_t)
+    params = (exercise_data.exercise_cal,ranking_datetime)
     cur.execute("select count(*) from Exercise WHERE Exercise.kcal > ? "
-                "AND time_stamp BETWEEN ? AND ?", params)
+                "AND date(datetime(time_stamp,'-4 hours'))==?", params)
     cal_ranking = int(cur.fetchone()[0])
     print(cal_ranking)
 
