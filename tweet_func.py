@@ -3,11 +3,9 @@ import tweepy
 import datetime
 import config
 import urllib
-import random
 import info_convert
 import sqlite3
 from PIL import Image, ImageDraw, ImageFont
-import re
 
 
 # TwitterのAPI_TOKEN
@@ -101,9 +99,6 @@ def make_ranking_picture(exercise_data_list):
     # ベース画像を読み込む
     im = Image.open('ranking_template.png')
     draw = ImageDraw.Draw(im)
-
-    # 画像サイズ
-    W, H = (1200, 630)
 
     # 枠幅
     W_song = 390
