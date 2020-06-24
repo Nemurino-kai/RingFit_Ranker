@@ -155,12 +155,11 @@ def tweet_ranking(api):
     # 昨日の04:00:00 から 今日の03:59:59まで
     now = datetime.datetime.now(JST)
     yesterday = now - datetime.timedelta(days=1)
-    start_t = yesterday.strftime("%Y-%m-%d ") + "04:00:00"
-    stop_t = now.strftime("%Y-%m-%d ") + "03:59:59"
-    params = (start_t, stop_t)
+    yesterday = yesterday.strftime("%Y-%m-%d")
+    params = (yesterday, )
 
     cur.execute("SELECT user_name,kcal "
-                "FROM (SELECT *, RANK() OVER(PARTITION BY user_screen_name ORDER BY kcal DESC, tweeted_time ASC) AS rnk FROM Exercise WHERE  time_stamp BETWEEN ? AND ?) tmp "
+                "FROM (SELECT *, RANK() OVER(PARTITION BY user_screen_name ORDER BY kcal DESC, tweeted_time ASC) AS rnk FROM Exercise WHERE  date(datetime(time_stamp,'-4 hours')) == ?) tmp "
                 "WHERE rnk = 1 ORDER BY kcal DESC, tweeted_time ASC  LIMIT 10;",params)
 
 
