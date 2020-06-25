@@ -59,7 +59,7 @@ def user():
 
     cur.execute("WITH tmp AS (SELECT *, RANK() OVER(PARTITION BY user_screen_name, date(datetime(time_stamp,'-4 hours')) ORDER BY kcal DESC, id) AS rnk ,"
                 "RANK() OVER(PARTITION BY date(datetime(time_stamp,'-4 hours')) ORDER BY kcal DESC, id) AS daily_rank FROM Exercise) "
-                "SELECT daily_rank,kcal,tweeted_time FROM tmp WHERE rnk = 1 AND user_screen_name==? ORDER BY tweeted_time DESC;",params)
+                "SELECT daily_rank,kcal,tweeted_time, strftime('%w', tweeted_time) AS weeknumber FROM tmp WHERE rnk = 1 AND user_screen_name==? ORDER BY tweeted_time DESC;",params)
 
     exercise_data_list = cur.fetchall()
 
