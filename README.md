@@ -11,12 +11,16 @@ https://twitter.com/RingFitRanker で運営中
 ## 機能２
 - 毎日4時に順位を集計し、12時頃に消費カロリー数ランキング Top10を画像で呟きます。
 
-![A1](https://user-images.githubusercontent.com/40136659/84641755-78eb4200-af36-11ea-802d-18bb9300c749.png)
+![top10](https://user-images.githubusercontent.com/40136659/84641755-78eb4200-af36-11ea-802d-18bb9300c749.png)
 
 ## 機能３
 - https://ringfit.work から、全員分の順位が見れます。
 - 過去の日付の順位を見ることも可能です。ページネーションに対応しています。
-![C42](https://user-images.githubusercontent.com/40136659/83976183-6c158f80-a933-11ea-826c-5eafd284278b.png)
+![all](https://user-images.githubusercontent.com/40136659/83976183-6c158f80-a933-11ea-826c-5eafd284278b.png)
+
+## 機能４
+- https://ringfit.work/user から、Twitterの@ユーザ名を入力することで、いままでの運動記録を見ることができます。
+![user](https://user-images.githubusercontent.com/40136659/85702894-cecf9f00-b719-11ea-9124-abbf45b68860.jpg)
 
 ## 開発者向けのメッセージ
 ### システム構成図
