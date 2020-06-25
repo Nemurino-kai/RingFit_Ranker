@@ -10,12 +10,18 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ja.js"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tablesorter.css') }}">
 {% endblock %}
 
 {% block scripts %}
 {{super()}}
 {{google.uanalytics('UA-168052698-1')}}
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.1/js/jquery.tablesorter.min.js"></script>
+<script>
+    $(document).ready(function() {
+    $('#personalTable').tablesorter();
+});
+</script>
 {% endblock %}
 
 
@@ -63,7 +69,7 @@
 
 
           <div class="table-responsive">
-            <table class="table table-striped table-sm">
+            <table class="tablesorter table table-striped table-sm"  id="personalTable">
               <thead>
                 <tr>
                   <th>Rank</th>
@@ -74,7 +80,7 @@
               <tbody>
     {% for result in results %}
     <tr>
-        <td>{{ result[0] }}</td>
+        <td>{{ result[0] }}位</td>
         <td>{{ result[1] }}</td>
         <td>{{ result[2] }}</td>
     </tr>
