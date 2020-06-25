@@ -57,9 +57,9 @@ def user():
     if user is None: user = ""
     params=(user,)
 
-    cur.execute("SELECT kcal,tweeted_time "
-                "FROM (SELECT *, RANK() OVER(PARTITION BY user_screen_name, date(datetime(time_stamp,'-4 hours')) ORDER BY kcal DESC, id) AS rnk FROM Exercise WHERE user_screen_name==?) tmp "
-                "WHERE rnk = 1 ORDER BY tweeted_time DESC;",params)
+    cur.execute("WITH tmp AS (SELECT *, RANK() OVER(PARTITION BY user_screen_name, date(datetime(time_stamp,'-4 hours')) ORDER BY kcal DESC, id) AS rnk ,"
+                "RANK() OVER(PARTITION BY date(datetime(time_stamp,'-4 hours')) ORDER BY kcal DESC, id) AS daily_rank FROM Exercise) "
+                "SELECT daily_rank,kcal,tweeted_time FROM tmp WHERE rnk = 1 AND user_screen_name==? ORDER BY tweeted_time DESC;",params)
 
     exercise_data_list = cur.fetchall()
 
