@@ -30,10 +30,10 @@ def tweet():
     last_data_update_time = datetime.datetime.now(JST)
     # --------------------------------------------------------------
 
-    while True:
+    print("画像を検索")
+    search_exercise_data(api,interrupt=False)
 
-        print("画像を検索")
-        search_exercise_data(api)
+    while True:
 
         # 前回のデータ更新から1時間が経っているかつ、12時台なら
         if datetime.datetime.now(JST) - last_data_update_time > datetime.timedelta(hours=1) and datetime.datetime.now(
@@ -45,6 +45,8 @@ def tweet():
         print("5分sleep")
         time.sleep(300)
 
+        print("画像を検索")
+        search_exercise_data(api)
 
 if __name__ == '__main__':
     try:

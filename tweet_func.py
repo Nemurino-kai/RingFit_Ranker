@@ -29,7 +29,7 @@ def auth_twitter():
 
 
 # 運動記録をツイッター上から検索し、データベースに追加する, フォローしてくれている人にはリプライする。
-def search_exercise_data(api, max_number=300):
+def search_exercise_data(api, max_number=300,interrupt=True):
     conn = sqlite3.connect(config.DATABASE_NAME)
     cur = conn.cursor()
     # フォローしてくれている人を取得
@@ -39,7 +39,9 @@ def search_exercise_data(api, max_number=300):
         print(tweet.full_text)
         # idが重複していたら、すでにそこまで検索してあるので中断
         cur.execute("select count(*) from Exercise where tweet_id == ?", (tweet.id,))
-        if int(cur.fetchone()[0]): return
+        if int(cur.fetchone()[0]) :
+            if interrupt: return
+            else: continue
         # imgがリングフィットのものでなければcontinue
         if not fetch_image(tweet): continue
         try:
