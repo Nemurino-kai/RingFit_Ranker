@@ -5,6 +5,8 @@ import config
 import urllib
 import info_convert
 import sqlite3
+import traceback
+import utils
 from PIL import Image, ImageDraw, ImageFont
 
 
@@ -62,8 +64,9 @@ def search_exercise_data(api, max_number=300,interrupt=True):
                 reply_exercise_result(api,cur,exercise_data,tweet)
 
         except tweepy.error.TweepError:
-            import traceback
             traceback.print_exc()
+            utils.send_mail("Tweepy has occurred.", traceback.format_exc())
+
 
 # @{TWITTER_ID}へのリプに対し、順位を返信する。
 # TODO:開発中/まだ使えません
