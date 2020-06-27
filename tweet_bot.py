@@ -46,7 +46,7 @@ def tweet():
         time.sleep(300)
 
         print("画像を検索")
-        search_exercise_data(api)
+        search_exercise_data(api, max_number=100, interrupt=False)
 
 if __name__ == '__main__':
     try:
