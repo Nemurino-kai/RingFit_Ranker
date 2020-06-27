@@ -57,9 +57,9 @@ def user():
     if user is None: user = ""
     params=(user,)
 
-    cur.execute("WITH tmp AS (SELECT *, RANK() OVER(PARTITION BY user_screen_name, date(datetime(time_stamp,'-4 hours')) ORDER BY kcal DESC, id) AS rnk ,"
-                "RANK() OVER(PARTITION BY date(datetime(time_stamp,'-4 hours')) ORDER BY kcal DESC) AS daily_rank FROM Exercise) "
-                "SELECT daily_rank,kcal,tweeted_time, strftime('%w', datetime(time_stamp,'-4 hours')) AS weeknumber FROM tmp WHERE rnk = 1 AND user_screen_name==? ORDER BY tweeted_time DESC;",params)
+    cur.execute("WITH NonOverlapTable AS (SELECT *, RANK() OVER(PARTITION BY user_screen_name, date(datetime(time_stamp,'-4 hours')) ORDER BY kcal DESC, id) AS rnk FROM Exercise)"
+                ",DailyRankedTable AS (SELECT *,RANK() OVER(PARTITION BY date(datetime(time_stamp,'-4 hours')) ORDER BY kcal DESC) AS daily_rank FROM NonOverlapTable WHERE rnk = 1)"
+                "SELECT daily_rank,kcal,tweeted_time, strftime('%w', datetime(time_stamp,'-4 hours')) AS weeknumber FROM DailyRankedTable WHERE rnk = 1 AND user_screen_name==? ORDER BY tweeted_time DESC;",params)
 
     exercise_data_list = cur.fetchall()
 
