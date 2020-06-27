@@ -48,10 +48,10 @@ def search_exercise_data(api, max_number=300,interrupt=True):
         if not fetch_image(tweet): continue
         try:
             # 画像から運動記録を読み取る
-            exercise_data = info_convert.image_to_data(tweet.user.name)
-            print(exercise_data.exercise_cal)
+            exercise_data = info_convert.image_to_data()
+            print(exercise_data.cal)
             # DBに運動記録を追加
-            params = (exercise_data.exercise_cal,tweet.user.name,tweet.user.screen_name,tweet.id,tweet.created_at+ datetime.timedelta(hours=9))
+            params = (exercise_data.cal,tweet.user.name,tweet.user.screen_name,tweet.id,tweet.created_at+ datetime.timedelta(hours=9))
             cur.execute(
                 "insert into Exercise (kcal,user_name,user_screen_name,tweet_id,tweeted_time) "
                 "values (?,?,?,?,?) ",params
@@ -201,14 +201,14 @@ def reply_exercise_result(api,cur,exercise_data,status):
     print(exercise_data)
 
     # 消費カロリーの順位を計算する
-    params = (exercise_data.exercise_cal,ranking_datetime)
+    params = (exercise_data.cal,ranking_datetime)
     cur.execute("select count(*) from Exercise WHERE Exercise.kcal > ? "
                 "AND date(datetime(time_stamp,'-4 hours'))==?", params)
     cal_ranking = int(cur.fetchone()[0])
     print(cal_ranking)
 
     tweet = "@" + str(status.user.screen_name) + '\n'
-    tweet += str(exercise_data.exercise_cal) + "kcal消費 いい汗かいたね！お疲れ様！\n"
+    tweet += str(exercise_data.cal) + "kcal消費 いい汗かいたね！お疲れ様！\n"
     tweet += f"今日の順位 {cal_ranking + 1}位/{len(exercise_data_list)}人中"
     print(exercise_data_list)
     info_convert.datalist_to_histogram(info_convert.convert_datatuple_to_callist(exercise_data_list),

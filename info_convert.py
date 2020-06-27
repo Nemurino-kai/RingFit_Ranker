@@ -16,11 +16,10 @@ TEMPLATE = cv2.imread('template.jpg')
 
 
 class ExerciseData:
-    def __init__(self, time, cal, user_name):
-        self.exercise_time = time
-        self.exercise_cal = cal
-        self.user_name = user_name
-
+    def __init__(self, time, cal,distance):
+        self.time = time
+        self.cal = cal
+        self.distance = distance
 
 def read_cal_by_tesseract(image):
     image = image_processing.skew_image(image)
@@ -91,27 +90,27 @@ def is_result_image():
         return False
 
 
-def image_to_data(user_name):
+def image_to_data():
     fetch_image = cv2.imread('temp.jpg')
 
     # 各部分の画像を切り出す
-    total_time = fetch_image[257:257 + 84, 552:552 + 404]
+    # total_time = fetch_image[257:257 + 84, 552:552 + 404]
     total_cal = fetch_image[396:396 + 65, 586:586 + 228]
-    total_distance = fetch_image[493:493 + 76, 560:560 + 396]
+    # total_distance = fetch_image[493:493 + 76, 560:560 + 396]
 
-    # time = read_time(total_time)
     # dummyData
     time = datetime.time(second=0)
     cal = read_cal_by_tesseract(total_cal)
-    return ExerciseData(time, cal, user_name)
+    distance = 0
+    return ExerciseData(time, cal,distance)
 
 
 def convert_datalist_to_timelist(exercise_data_list):
-    return [e.exercise_time.hour + (e.exercise_time.minute / 60.0) + (e.exercise_time.second / 3600.0) for e in
+    return [e.time.hour + (e.time.minute / 60.0) + (e.time.second / 3600.0) for e in
             exercise_data_list]
 
 
-def convert_datatuple_to_callist(exercise_data_list):
+def convert_datatuple_to_list(exercise_data_list):
     return [e[0] for e in exercise_data_list]
 
 
@@ -141,7 +140,7 @@ if __name__ == '__main__':
                 "WHERE date(time_stamp) == date('now', '+9 hours') and kcal < 150 ORDER BY kcal DESC ;")
     exercise_data_list = cur.fetchall()
     print(exercise_data_list)
-    # num_list = convert_datatuple_to_callist(exercise_data_list)
+    # num_list = convert_datatuple_to_list(exercise_data_list)
 
     num_list = [0, 10, 10, 10, 10.1, 30, 30, 30, 30.2, 40, 50, 70, 90, 200]
     time_ranking = 10
