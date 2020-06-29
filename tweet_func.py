@@ -45,10 +45,11 @@ def search_exercise_data(api, max_number=300,interrupt=True):
             if interrupt: return
             else: continue
         # imgがリングフィットのものでなければcontinue
-        if not fetch_image(tweet): continue
+        image_type = fetch_image(tweet)
+        if image_type is None: continue
         try:
             # 画像から運動記録を読み取る
-            exercise_data = info_convert.image_to_data()
+            exercise_data = info_convert.image_to_data(image_type)
             print(exercise_data.cal)
             # DBに運動記録を追加
             params = (exercise_data.cal,tweet.user.name,tweet.user.screen_name,tweet.id,tweet.created_at+ datetime.timedelta(hours=9))
@@ -166,12 +167,12 @@ def tweet_ranking(api):
     api.update_with_media(status=tweet, filename='./ranking_picture.png')
 
 
-# 運動結果の画像を取得出来たらtrue,できなかったらfalseを返す
+# 運動結果の画像を取得出来たらimagetype,できなかったらNoneを返す
 def fetch_image(status):
     # mediaがなければ飛ばす
     if not hasattr(status, 'extended_entities'):
         print("Media not found.")
-        return False
+        return None
     # mediaを保存する
     media_url = status.extended_entities['media'][0]['media_url']
     try:
@@ -179,12 +180,12 @@ def fetch_image(status):
     except IOError:
         # 保存に失敗したら飛ばす
         print("save miss")
-        return False
+        return None
     # 運動結果の画像でなければ飛ばす
-    if not info_convert.is_result_image():
+    image_type = info_convert.is_result_image()
+    if image_type is None:
         print("Media is not exercise image.")
-        return False
-    return True
+    return image_type
 
 def reply_exercise_result(api,cur,exercise_data,status):
 
@@ -211,7 +212,7 @@ def reply_exercise_result(api,cur,exercise_data,status):
     tweet += str(exercise_data.cal) + "kcal消費 いい汗かいたね！お疲れ様！\n"
     tweet += f"今日の順位 {cal_ranking + 1}位/{len(exercise_data_list)}人中"
     print(exercise_data_list)
-    info_convert.datalist_to_histogram(info_convert.convert_datatuple_to_callist(exercise_data_list),
+    info_convert.datalist_to_histogram(info_convert.convert_datatuple_to_list(exercise_data_list),
                                        cal_ranking)
     api.update_with_media(status=tweet, in_reply_to_status_id=status.id, filename='./hist.png')
 

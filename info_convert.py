@@ -1,3 +1,4 @@
+from enum import Enum,auto,unique
 import cv2
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
@@ -13,6 +14,7 @@ import image_processing
 
 THRESHOLD = 0.95
 TEMPLATE = cv2.imread('template.jpg')
+TEMPLATE2 = cv2.imread('time.jpg')
 
 
 class ExerciseData:
@@ -20,6 +22,11 @@ class ExerciseData:
         self.time = time
         self.cal = cal
         self.distance = distance
+
+@unique
+class ImageType(Enum):
+    EXERCISE_IMAGE = auto()
+    CUSTOM_EXERCISE_IMAGE = auto()
 
 def read_cal_by_tesseract(image):
     image = image_processing.skew_image(image)
@@ -78,25 +85,37 @@ def is_result_image():
     # fetch_imageのsizeが公式のものでなければout
     h, w, _ = fetch_image.shape
     if h != 720 or w != 1280:
-        return False
+        return None
 
     result = cv2.matchTemplate(fetch_image, TEMPLATE, cv2.TM_CCOEFF_NORMED)
     # 検出結果から検出領域の位置を取得
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
     print(max_val)
     if max_val > THRESHOLD:
-        return True
+        return ImageType.EXERCISE_IMAGE
+    result = cv2.matchTemplate(fetch_image, TEMPLATE2, cv2.TM_CCOEFF_NORMED)
+    # 検出結果から検出領域の位置を取得
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+    print(max_val)
+    if max_val > THRESHOLD:
+        return ImageType.CUSTOM_EXERCISE_IMAGE
     else:
-        return False
+        return None
 
 
-def image_to_data():
+def image_to_data(imagetype):
     fetch_image = cv2.imread('temp.jpg')
 
     # 各部分の画像を切り出す
-    # total_time = fetch_image[257:257 + 84, 552:552 + 404]
-    total_cal = fetch_image[396:396 + 65, 586:586 + 228]
-    # total_distance = fetch_image[493:493 + 76, 560:560 + 396]
+    if imagetype == ImageType.EXERCISE_IMAGE:
+        # total_time = fetch_image[257:257 + 84, 552:552 + 404]
+        total_cal = fetch_image[396:396 + 65, 586:586 + 228]
+        # total_distance = fetch_image[493:493 + 76, 560:560 + 396]
+    elif imagetype == ImageType.CUSTOM_EXERCISE_IMAGE:
+        total_cal = fetch_image[437:437 + 65, 584:584+ 228]
+    else:
+        print(imagetype)
+        raise ValueError("An error has ocurred! Image is not a exercise image.")
 
     # dummyData
     time = datetime.time(second=0)
