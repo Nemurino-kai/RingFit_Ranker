@@ -27,8 +27,10 @@ https://twitter.com/RingFitRanker で運営中
 ![ranker](https://user-images.githubusercontent.com/40136659/82590990-977d4800-9bd9-11ea-898a-369598a34226.png)
 
 ### 使用方法
-npm のforeverコマンドを用いるなどして、tweet_bot.py を常駐させてください。<br>
-例：``` forever start -c python3 tweet_bot.py  ```<br>
+tweet_bot_cron.py を実行すると、<b>#リングフィットアドベンチャー</b> の画像を検索・集計し、順位をリプライします。<br>
+ranking_bot_cron.py を実行すると、前日4時から当日3時59分59秒までのランキングベスト10をツイートします。<br>
+cronを用いるなどして、定期的に実行してください。
+
 config.pyは以下の通り設定し、他ファイルと同じディレクトリに置いてください。
 
 ```python
@@ -45,4 +47,5 @@ RANKING_FONT = "ランキング画像のユーザ名に用いるフォント"
 KCAL_FONT = "ランキング画像の消費カロリーに用いるフォント"
 ```
 
-uwsgiについては、``` uwsgi --ini uwsgi_config.ini ``` で立ち上げられます。
+info_pages.py は、flaskにより作られたWebアプリです。消費カロリーの順位などを見ることができます。
+``` uwsgi --ini uwsgi_config.ini ``` とすることで、info_pages.pyをuwsgiで動かせます。
