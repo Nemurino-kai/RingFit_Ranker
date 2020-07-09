@@ -48,4 +48,3 @@ KCAL_FONT = "ランキング画像の消費カロリーに用いるフォント"
 ```
 
 info_pages.py は、flaskにより作られたWebアプリです。消費カロリーの順位などを見ることができます。
-``` uwsgi --ini uwsgi_config.ini ``` とすることで、info_pages.pyをuwsgiで動かせます。
