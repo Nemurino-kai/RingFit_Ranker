@@ -173,19 +173,23 @@ def fetch_image(status):
     if not hasattr(status, 'extended_entities'):
         print("Media not found.")
         return None
-    # mediaを保存する
-    media_url = status.extended_entities['media'][0]['media_url']
-    try:
-        urllib.request.urlretrieve(media_url + ':orig', 'temp.jpg')
-    except IOError:
-        # 保存に失敗したら飛ばす
-        print("save miss")
-        return None
-    # 運動結果の画像でなければ飛ばす
-    image_type = info_convert.is_result_image()
-    if image_type is None:
-        print("Media is not exercise image.")
-    return image_type
+    for i in range(len(status.extended_entities['media'])):
+        # mediaを保存する
+        media_url = status.extended_entities['media'][i]['media_url']
+        try:
+            urllib.request.urlretrieve(media_url + ':orig', 'temp.jpg')
+        except IOError:
+            # 保存に失敗したら飛ばす
+            print("save miss")
+            continue
+        # 運動結果の画像でなければ飛ばす
+        image_type = info_convert.is_result_image()
+        if image_type is None:
+            print("Media is not exercise image.")
+            continue
+        else:
+            return image_type
+    return None
 
 def reply_exercise_result(api,cur,exercise_data,status):
 
