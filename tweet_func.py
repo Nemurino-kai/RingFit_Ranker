@@ -8,6 +8,7 @@ import sqlite3
 import traceback
 import utils
 from PIL import Image, ImageDraw, ImageFont
+import random
 
 
 # TwitterのAPI_TOKEN
@@ -21,6 +22,8 @@ TWITTER_ID = config.TWITTER_ID
 # タイムゾーン指定
 JST = datetime.timezone(datetime.timedelta(hours=+9), 'JST')
 
+# リプライ用のメッセージを読み込み
+lines = [line.rstrip('\n') for line in open('talking_list.txt',encoding="utf-8")]
 
 # TwitterAPI認証用関数
 def auth_twitter():
@@ -191,6 +194,9 @@ def fetch_image(status):
             return image_type
     return None
 
+def get_reply_message():
+    return random.choice(lines)
+
 def reply_exercise_result(api,cur,exercise_data,status):
 
     now = datetime.datetime.now(JST)
@@ -213,7 +219,7 @@ def reply_exercise_result(api,cur,exercise_data,status):
     print(cal_ranking)
 
     tweet = "@" + str(status.user.screen_name) + '\n'
-    tweet += str(exercise_data.cal) + "kcal消費 いい汗かいたね！お疲れ様！\n"
+    tweet += str(exercise_data.cal) + "kcal消費 "+ get_reply_message() + "\n"
     tweet += f"今日の順位 {cal_ranking + 1}位/{len(exercise_data_list)}人中"
     print(exercise_data_list)
     info_convert.datalist_to_histogram(info_convert.convert_datatuple_to_list(exercise_data_list),
