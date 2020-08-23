@@ -1,17 +1,21 @@
 # coding: utf-8
-from flask import Flask, render_template,request
+from flask import Flask, render_template,request, jsonify
 from flask_bootstrap import Bootstrap
 from flask_paginate import Pagination, get_page_parameter
 import config
 import sqlite3
 import datetime
 import pandas as pd
+from info_api import module_api  #追加モジュール
 
 app = Flask(__name__)
+app.config["JSON_AS_ASCII"] = False
 bootstrap = Bootstrap(app)
-
 # タイムゾーン指定
 JST = datetime.timezone(datetime.timedelta(hours=+9), 'JST')
+
+#他モジュール(.py)から呼び出す
+app.register_blueprint(module_api)
 
 @app.route('/')
 def index():
