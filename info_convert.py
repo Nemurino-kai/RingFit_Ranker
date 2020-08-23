@@ -146,7 +146,7 @@ def convert_datatuple_to_list(exercise_data_list):
 
 def datalist_to_histogram(exercise_list, ranking):
     plt.figure()
-    n, bins, patches = plt.hist(exercise_list, color='darkturquoise', ec='black', bins=HISTGRAM_BINS)
+    n, bins, patches = plt.hist(exercise_list, color='darkturquoise', ec='black', bins=HISTGRAM_BINS,range=(0,max(exercise_list)))
     print(n, bins)
     print(exercise_list[ranking])
     print("xは", np.where(exercise_list[ranking] >= bins)[0][-1])
@@ -183,7 +183,7 @@ if __name__ == '__main__':
     #num_list = [0, 10, 10, 10, 10.1, 30, 30, 30, 30.2, 40, 50, 70, 90, 200]
     time_ranking = 2
     plt.figure()
-    n, bins, patches = plt.hist(num_list, color='darkturquoise', ec='black', bins=HISTGRAM_BINS)
+    n, bins, patches = plt.hist(num_list, color='darkturquoise', ec='black', bins=HISTGRAM_BINS,range=(0,max(num_list)))
     print(n, bins)
     print(np.where(num_list[time_ranking] >= bins)[0])
 
