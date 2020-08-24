@@ -269,5 +269,6 @@ if __name__ == '__main__':
 
     # もしフォローしてくれている人なら、順位を呟く
     if tweet.user.id in follower_id:
-        print(tweet.user.screen_name," さんにお返事します")
+        reply_flag = input(f"{tweet.user.screen_name}さんにお返事しますか？(y or n):")
+        if reply_flag != "y": exit()
         reply_exercise_result(api,cur,exercise_data,tweet)
