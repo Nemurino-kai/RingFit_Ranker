@@ -2,6 +2,7 @@ from enum import Enum,auto,unique
 import cv2
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+from matplotlib.colors import LinearSegmentedColormap
 
 import re
 import datetime
@@ -15,7 +16,7 @@ import image_processing
 THRESHOLD = 0.95
 TEMPLATE = cv2.imread('template.jpg')
 TEMPLATE2 = cv2.imread('time.jpg')
-
+HISTGRAM_BINS =30
 
 class ExerciseData:
     def __init__(self, time, cal,distance):
@@ -27,6 +28,16 @@ class ExerciseData:
 class ImageType(Enum):
     EXERCISE_IMAGE = auto()
     CUSTOM_EXERCISE_IMAGE = auto()
+
+def generate_cmap(colors):
+    """自分で定義したカラーマップを返す"""
+    values = range(len(colors))
+
+    vmax = np.ceil(np.max(values))
+    color_list = []
+    for v, c in zip(values, colors):
+        color_list.append( ( v/ vmax, c) )
+    return LinearSegmentedColormap.from_list('custom_cmap', color_list)
 
 def read_cal_by_tesseract(image):
     image = image_processing.skew_image(image)
@@ -135,13 +146,19 @@ def convert_datatuple_to_list(exercise_data_list):
 
 def datalist_to_histogram(exercise_list, ranking):
     plt.figure()
-    n, bins, patches = plt.hist(exercise_list, color='darkturquoise', ec='black', bins=30)
+    n, bins, patches = plt.hist(exercise_list, color='darkturquoise', ec='black', bins=HISTGRAM_BINS,range=(0,max(exercise_list)))
     print(n, bins)
     print(exercise_list[ranking])
     print("xは", np.where(exercise_list[ranking] >= bins)[0][-1])
     x = np.where(exercise_list[ranking] >= bins)[0][-1]
-    if x == 30: x = x - 1
+    if x == HISTGRAM_BINS: x = x - 1
+
+    cm = generate_cmap(['dodgerblue','darkturquoise', 'aqua','cyan'])
+    for i in range(HISTGRAM_BINS):
+        patches[i].set_facecolor(plt.get_cmap(cm)((bins[i] / bins[HISTGRAM_BINS])*1))
+    if x == HISTGRAM_BINS: x = x-1
     patches[x].set_facecolor('tomato')
+
     # y軸を整数にする
     plt.gca().get_yaxis().set_major_locator(ticker.MaxNLocator(integer=True))
     plt.savefig('hist.png')  # ヒストグラムを保存
@@ -149,6 +166,8 @@ def datalist_to_histogram(exercise_list, ranking):
 
 
 if __name__ == '__main__':
+    is_result_image()
+
     import sqlite3
     import config
 
@@ -156,27 +175,40 @@ if __name__ == '__main__':
     conn = sqlite3.connect(config.DATABASE_NAME)
     cur = conn.cursor()
     cur.execute("select kcal from Exercise "
-                "WHERE date(time_stamp) == date('now', '+9 hours') and kcal < 150 ORDER BY kcal DESC ;")
+                "WHERE date(time_stamp) == '2020-06-01' and kcal < 999 ORDER BY kcal DESC ;")
     exercise_data_list = cur.fetchall()
     print(exercise_data_list)
-    # num_list = convert_datatuple_to_list(exercise_data_list)
+    num_list = convert_datatuple_to_list(exercise_data_list)
 
-    num_list = [0, 10, 10, 10, 10.1, 30, 30, 30, 30.2, 40, 50, 70, 90, 200]
-    time_ranking = 10
+    #num_list = [0, 10, 10, 10, 10.1, 30, 30, 30, 30.2, 40, 50, 70, 90, 200]
+    time_ranking = 2
     plt.figure()
-    n, bins, patches = plt.hist(num_list, color='darkturquoise', ec='black', bins=30)
+    n, bins, patches = plt.hist(num_list, color='darkturquoise', ec='black', bins=HISTGRAM_BINS,range=(0,max(num_list)))
     print(n, bins)
     print(np.where(num_list[time_ranking] >= bins)[0])
 
     print(np.where(num_list[time_ranking] >= bins)[0][-1])
     x = np.where(num_list[time_ranking] >= bins)[0][-1]
-    if x == 20: x = 19
+    cm = generate_cmap(['dodgerblue','darkturquoise', 'aqua','cyan'])
+    for i in range(HISTGRAM_BINS):
+        patches[i].set_facecolor(plt.get_cmap(cm)((bins[i] / bins[HISTGRAM_BINS])*1))
+    if x == HISTGRAM_BINS: x = x-1
     patches[x].set_facecolor('tomato')
     plt.gca().get_yaxis().set_major_locator(ticker.MaxNLocator(integer=True))
     plt.savefig('hist.png')
     plt.show()
 
-    fetch_image = cv2.imread('images/badsmall.jpg')
+    fetch_image = cv2.imread('images/nonread.jpg')
+    result = cv2.matchTemplate(fetch_image, TEMPLATE, cv2.TM_CCOEFF_NORMED)
+    # 検出結果から検出領域の位置を取得
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+    print(max_val)
+    if max_val > THRESHOLD:
+        print(ImageType.EXERCISE_IMAGE)
+    result = cv2.matchTemplate(fetch_image, TEMPLATE2, cv2.TM_CCOEFF_NORMED)
+    # 検出結果から検出領域の位置を取得
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+    print(max_val)
 
     # 各部分の画像を切り出す
     total_cal = fetch_image[396:396 + 65, 586:586 + 228]
