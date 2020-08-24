@@ -9,6 +9,7 @@ import traceback
 import utils
 from PIL import Image, ImageDraw, ImageFont
 import random
+import sys
 
 
 # TwitterのAPI_TOKEN
@@ -227,5 +228,47 @@ def reply_exercise_result(api,cur,exercise_data,status):
     api.update_with_media(status=tweet, in_reply_to_status_id=status.id, filename='./hist.png')
 
 if __name__ == '__main__':
+    args = sys.argv
+    if len(args) != 2:
+        print("wrong usage")
+        exit()
     api = auth_twitter()
-    tweet_ranking(api)
+    conn = sqlite3.connect(config.DATABASE_NAME)
+    cur = conn.cursor()
+    # フォローしてくれている人を取得
+    follower_id = api.followers_ids()
+    tweet = api.get_status(int(args[1]))
+
+    # idが重複していたら、消去してよいか確認
+    cur.execute("select count(*) from Exercise where tweet_id == ?", (tweet.id,))
+    if int(cur.fetchone()[0]) :
+        delete_flag=input("Data is already exist in DB. Do you want to delete? (y or n):")
+        if delete_flag != "y": exit()
+        else: cur.execute("delete from Exercise where tweet_id == ?", (tweet.id,))
+
+    # imgがリングフィットのものでなければ、手動でkcalを入力
+    image_type = fetch_image(tweet)
+    if image_type is None:
+        execute_flag=input("Image type is None. Do you continue yet? (y or n):")
+        if execute_flag != "y":exit()
+        else:
+            set_cal = int(input("please input cal.:"))
+            exercise_data = info_convert.ExerciseData(datetime.time(second=0), set_cal, 0)
+    else:
+        # 画像から運動記録を読み取る
+        exercise_data = info_convert.image_to_data(image_type)
+        print(f"{exercise_data.cal}kcal と予測しました。")
+        kcal_flag=input("If cal is wrong, enter cal. If cal is correct, enter y.(y or number):")
+        if kcal_flag != "y": exercise_data.cal = int(kcal_flag)
+    params = (exercise_data.cal,tweet.user.name,tweet.user.screen_name,tweet.id,tweet.created_at+ datetime.timedelta(hours=9))
+    cur.execute(
+                    "insert into Exercise (kcal,user_name,user_screen_name,tweet_id,tweeted_time) "
+                    "values (?,?,?,?,?) ",params
+    )
+    conn.commit()
+
+    # もしフォローしてくれている人なら、順位を呟く
+    if tweet.user.id in follower_id:
+        reply_flag = input(f"{tweet.user.screen_name}さんにお返事しますか？(y or n):")
+        if reply_flag != "y": exit()
+        reply_exercise_result(api,cur,exercise_data,tweet)
