@@ -162,17 +162,18 @@ def image_to_data(imagetype):
     # 各部分の画像を切り出す
     if imagetype == ImageType.EXERCISE_IMAGE:
         # total_time = fetch_image[257:257 + 84, 552:552 + 404]
-        total_cal = fetch_image[396:396 + 65, 586:586 + 228]
+        total_cal = fetch_image[396:396 + 65, 617:617 + 197]
         # total_distance = fetch_image[493:493 + 76, 560:560 + 396]
     elif imagetype == ImageType.CUSTOM_EXERCISE_IMAGE:
-        total_cal = fetch_image[437:437 + 65, 584:584+ 228]
+        total_cal = fetch_image[437:437 + 65, 617:617 + 197]
     else:
         print(imagetype)
         raise ValueError("An error has ocurred! Image is not a exercise image.")
 
+
     # dummyData
     time = datetime.time(second=0)
-    cal = read_cal_by_tesseract(total_cal)
+    cal = read_cal_by_connectedComponets(total_cal)
     distance = 0
     return ExerciseData(time, cal,distance)
 
