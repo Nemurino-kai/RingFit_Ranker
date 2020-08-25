@@ -39,7 +39,48 @@ def generate_cmap(colors):
         color_list.append( ( v/ vmax, c) )
     return LinearSegmentedColormap.from_list('custom_cmap', color_list)
 
+def read_cal_by_connectedComponets(image):
+    # 大津の二値化
+    im_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    _, image = cv2.threshold(im_gray, 0, 255, cv2.THRESH_OTSU)
+
+    # 白黒反転
+    img_reverse = cv2.bitwise_not(image)
+    nlabels, labels, stats, centroids = cv2.connectedComponentsWithStats(img_reverse)
+
+    stats = stats[np.argsort(stats[:, 0])] # x座標でソート
+    kcal_str =""
+
+    if (nlabels > 4 or nlabels <= 1):
+        raise ValueError("ConnectedComponets > 4 or ConnectedComponets <= 1")
+        utils.send_mail("ConnectedComponets > 4 or ConnectedComponets <= 1",f"{nlabels} labels")
+
+    for i in range(1, nlabels):
+        cut_image = image[stats[i][1]:stats[i][1]+stats[i][3],stats[i][0]:stats[i][0]+stats[i][2]]
+        white_img = cv2.imread(f'numbers/white.jpg')
+        white_img = cv2.cvtColor(white_img, cv2.COLOR_BGR2GRAY)
+
+        height, width = cut_image.shape[:2]
+        white_img[0:height, 0:width] = cut_image
+        cut_image = white_img
+
+        similarity = 0
+        pred_num=0
+        for i in range(10):
+            tmp_img = cv2.imread(f'numbers/{i}.jpg')
+            tmp_img = cv2.cvtColor(tmp_img, cv2.COLOR_BGR2GRAY)
+
+            res = cv2.matchTemplate(cut_image, tmp_img, cv2.TM_CCOEFF_NORMED)
+            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+            if max_val>similarity:
+                pred_num = i
+                similarity = max_val
+        kcal_str = kcal_str + str(pred_num)
+    print(f"{kcal_str}kcalと推定します。")
+    return int(kcal_str)
+
 def read_cal_by_tesseract(image):
+
     image = image_processing.skew_image(image)
 
     # 大津の二値化をしておく
@@ -47,6 +88,7 @@ def read_cal_by_tesseract(image):
     _, image = cv2.threshold(im_gray, 0, 255, cv2.THRESH_OTSU)
 
     image = Image.fromarray(image)
+
 
     tools = pyocr.get_available_tools()
     if len(tools) == 0:
@@ -69,7 +111,7 @@ def read_cal_by_tesseract(image):
     # よくある誤字を修正
     retext = txt.replace(' ', '').replace('i', '1').replace(']', '1').replace('t', '1') \
         .replace('?', '2').replace('O', '0').replace('A', '4').replace('l', '1').replace('I', '1') \
-        .replace('Q', '9').replace('g', '9').replace('/', '7')
+        .replace('Q', '9').replace('g', '9').replace('2/7', '27').replace('/', '7')
 
     # 数字以外はすべて取り除き、intにする
     try:
@@ -86,7 +128,7 @@ def read_cal_by_tesseract(image):
         print(e)
         retext = int(re.sub('[^0-9]', '', txt))
 
-    if str(retext) != txt: print("Text is replaced.")
+    if str(retext) != txt: print(f"{txt} is replaced by {retext}.")
     return int(retext)
 
 
@@ -172,10 +214,11 @@ if __name__ == '__main__':
     import config
 
     # ヒストグラムのテスト
+    print("ヒストグラムテスト")
     conn = sqlite3.connect(config.DATABASE_NAME)
     cur = conn.cursor()
     cur.execute("select kcal from Exercise "
-                "WHERE date(time_stamp) == '2020-06-01' and kcal < 999 ORDER BY kcal DESC ;")
+                "WHERE date(time_stamp) == '2020-06-01' and kcal > 250 ORDER BY kcal DESC ;")
     exercise_data_list = cur.fetchall()
     print(exercise_data_list)
     num_list = convert_datatuple_to_list(exercise_data_list)
@@ -198,7 +241,9 @@ if __name__ == '__main__':
     plt.savefig('hist.png')
     plt.show()
 
-    fetch_image = cv2.imread('images/nonread.jpg')
+    # 画像の計測テスト
+    print("画像の計測テスト")
+    fetch_image = cv2.imread('images/official4.jpg')
     result = cv2.matchTemplate(fetch_image, TEMPLATE, cv2.TM_CCOEFF_NORMED)
     # 検出結果から検出領域の位置を取得
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
@@ -211,9 +256,21 @@ if __name__ == '__main__':
     print(max_val)
 
     # 各部分の画像を切り出す
-    total_cal = fetch_image[396:396 + 65, 586:586 + 228]
+    total_cal = fetch_image[396:396 + 65, 617:617 + 197]
+    #total_cal = fetch_image[437:437 + 65, 617:617 + 197]
 
     # time = read_time(total_time)
     # dummyData
     time = datetime.time(second=0)
+
+    import time
+    start = time.time()
     cal = read_cal_by_tesseract(total_cal)
+    elapsed_time = time.time() - start
+    print("elapsed_time:{0}".format(elapsed_time) + "[sec]")
+
+    start = time.time()
+    cal = read_cal_by_connectedComponets(total_cal)
+    elapsed_time = time.time() - start
+    print("elapsed_time:{0}".format(elapsed_time) + "[sec]")
+    print(cal)
