@@ -12,6 +12,11 @@
 {% block scripts %}
 {{super()}}
 {{google.uanalytics('UA-168052698-1')}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0.0/jquery.counterup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/2.0.5/waypoints.min.js"></script>
+<script>
+    $('.counter').counterUp();
+</script>
 {% endblock %}
 
 {% block content %}
@@ -57,6 +62,13 @@
     当サービスのアクセス解析には Google Analytics を使用しています。
     Google Analytics は、Cookieを用いて、個人を特定できない形でアクセス情報を収集・解析します。<br>
     データが収集・処理される仕組みについては、<a href="https://policies.google.com/technologies/partner-sites">こちら</a> を御覧ください
+
+    <br>
+
+<!--
+    <h3 style="text-align:center;">いままでの累計消費カロリー</h3>
+    <div style="text-align:center;"><span class="counter" style="font-size: 3em;">15689</span>kcal</div>
+-->
 
 </main>
     <br>

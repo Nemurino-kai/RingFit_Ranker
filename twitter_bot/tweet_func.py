@@ -42,7 +42,7 @@ def search_exercise_data(api, max_number=300,interrupt=True):
     follower_id = api.followers_ids()
 
     for tweet in tweepy.Cursor(api.search, q=f'#リングフィットアドベンチャー -filter:retweets filter:images',tweet_mode="extended").items(max_number):
-        print(tweet.full_text)
+        print(tweet.id)
         # idが重複していたら、すでにそこまで検索してあるので中断
         cur.execute("select count(*) from Exercise where tweet_id == ?", (tweet.id,))
         if int(cur.fetchone()[0]) :
@@ -54,7 +54,6 @@ def search_exercise_data(api, max_number=300,interrupt=True):
         try:
             # 画像から運動記録を読み取る
             exercise_data = info_convert.image_to_data(image_type)
-            print(exercise_data.cal)
             # DBに運動記録を追加
             params = (exercise_data.cal,tweet.user.name,tweet.user.screen_name,tweet.id,tweet.created_at+ datetime.timedelta(hours=9))
             cur.execute(
@@ -71,6 +70,8 @@ def search_exercise_data(api, max_number=300,interrupt=True):
         except tweepy.error.TweepError:
             traceback.print_exc()
             utils.send_mail("Tweepy has occurred.", traceback.format_exc())
+        except ValueError:
+            traceback.print_exc()
 
 
 # @{TWITTER_ID}へのリプに対し、順位を返信する。
@@ -95,7 +96,7 @@ def reply_ranking(api,item_num=100):
 
 def make_ranking_picture(exercise_data_list):
     # ベース画像を読み込む
-    im = Image.open('ranking_template.png')
+    im = Image.open('templates/ranking_template.png')
     draw = ImageDraw.Draw(im)
 
     # 枠幅
