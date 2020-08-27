@@ -52,8 +52,7 @@ def read_cal_by_connectedComponets(image):
     kcal_str =""
 
     if (nlabels > 4 or nlabels <= 1):
-        raise ValueError("ConnectedComponets > 4 or ConnectedComponets <= 1")
-        utils.send_mail("ConnectedComponets > 4 or ConnectedComponets <= 1",f"{nlabels} labels")
+        raise ValueError(f"ConnectedComponets > 4 or ConnectedComponets <= 1. nlabels is {nlabels}.")
 
     for i in range(1, nlabels):
         cut_image = image[stats[i][1]:stats[i][1]+stats[i][3],stats[i][0]:stats[i][0]+stats[i][2]]
@@ -162,10 +161,10 @@ def image_to_data(imagetype):
     # 各部分の画像を切り出す
     if imagetype == ImageType.EXERCISE_IMAGE:
         # total_time = fetch_image[257:257 + 84, 552:552 + 404]
-        total_cal = fetch_image[396:396 + 65, 617:617 + 197]
+        total_cal = fetch_image[400:400 + 60, 617:617 + 197]
         # total_distance = fetch_image[493:493 + 76, 560:560 + 396]
     elif imagetype == ImageType.CUSTOM_EXERCISE_IMAGE:
-        total_cal = fetch_image[437:437 + 65, 617:617 + 197]
+        total_cal = fetch_image[438:438 + 60, 617:617 + 197]
     else:
         print(imagetype)
         raise ValueError("An error has ocurred! Image is not a exercise image.")
@@ -244,7 +243,7 @@ if __name__ == '__main__':
 
     # 画像の計測テスト
     print("画像の計測テスト")
-    fetch_image = cv2.imread('images/official4.jpg')
+    fetch_image = cv2.imread('images/robust4.jpg')
     result = cv2.matchTemplate(fetch_image, TEMPLATE, cv2.TM_CCOEFF_NORMED)
     # 検出結果から検出領域の位置を取得
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
@@ -257,21 +256,13 @@ if __name__ == '__main__':
     print(max_val)
 
     # 各部分の画像を切り出す
-    total_cal = fetch_image[396:396 + 65, 617:617 + 197]
-    #total_cal = fetch_image[437:437 + 65, 617:617 + 197]
+    total_cal = fetch_image[400:400 + 60, 617:617 + 197]
+    #total_cal = fetch_image[438:438 + 60, 617:617 + 197]
 
     # time = read_time(total_time)
     # dummyData
     time = datetime.time(second=0)
 
-    import time
-    start = time.time()
     cal = read_cal_by_tesseract(total_cal)
-    elapsed_time = time.time() - start
-    print("elapsed_time:{0}".format(elapsed_time) + "[sec]")
 
-    start = time.time()
     cal = read_cal_by_connectedComponets(total_cal)
-    elapsed_time = time.time() - start
-    print("elapsed_time:{0}".format(elapsed_time) + "[sec]")
-    print(cal)
