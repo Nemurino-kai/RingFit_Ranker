@@ -29,11 +29,11 @@ https://twitter.com/RingFitRanker で運営中
 ![ranker](https://user-images.githubusercontent.com/40136659/82590990-977d4800-9bd9-11ea-898a-369598a34226.png)
 
 ### 使用方法
-tweet_bot_cron.py を実行すると、<b>#リングフィットアドベンチャー</b> の画像を検索・集計し、順位をリプライします。<br>
-ranking_bot_cron.py を実行すると、前日4時から当日3時59分59秒までのランキングベスト10をツイートします。<br>
+twitter_bot/tweet_bot_cron.py を実行すると、<b>#リングフィットアドベンチャー</b> の画像を検索・集計し、順位をリプライします。<br>
+twitter_bot/ranking_bot_cron.py を実行すると、前日4時から当日3時59分59秒までのランキングベスト10をツイートします。<br>
 cronを用いるなどして、定期的に実行してください。
 
-config.pyは以下の通り設定し、他ファイルと同じディレクトリに置いてください。
+config.pyは以下の通り設定し、flask_webappディレクトリ 及び twitter_botディレクトリ と同じ階層に置いてください。
 
 ```python
 CONSUMER_KEY = "ここに"
@@ -49,4 +49,4 @@ RANKING_FONT = "ランキング画像のユーザ名に用いるフォント"
 KCAL_FONT = "ランキング画像の消費カロリーに用いるフォント"
 ```
 
-info_pages.py は、flaskにより作られたWebアプリです。消費カロリーの順位などを見ることができます。
+flask_webapp/info_pages.py は、flaskにより作られたWebアプリです。消費カロリーの順位などを見ることができます。
