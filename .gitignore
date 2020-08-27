@@ -1,7 +1,11 @@
 temp.jpg
-/images/
+debugging_images/
 config.py
 result.db
 fonts/
+server_setting/
 ranking_picture.png
 hist.png
+SQLtest.py
+.idea/
+__pycache__/

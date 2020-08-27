@@ -14,8 +14,8 @@ import pyocr.builders
 import image_processing
 
 THRESHOLD = 0.95
-TEMPLATE = cv2.imread('template.jpg')
-TEMPLATE2 = cv2.imread('time.jpg')
+TEMPLATE = cv2.imread('templates/running.jpg')
+TEMPLATE2 = cv2.imread('templates/time.jpg')
 HISTGRAM_BINS =30
 
 class ExerciseData:
@@ -56,7 +56,7 @@ def read_cal_by_connectedComponets(image):
 
     for i in range(1, nlabels):
         cut_image = image[stats[i][1]:stats[i][1]+stats[i][3],stats[i][0]:stats[i][0]+stats[i][2]]
-        white_img = cv2.imread(f'numbers/white.jpg')
+        white_img = cv2.imread(f'templates/numbers/white.jpg')
         white_img = cv2.cvtColor(white_img, cv2.COLOR_BGR2GRAY)
 
         height, width = cut_image.shape[:2]
@@ -66,7 +66,7 @@ def read_cal_by_connectedComponets(image):
         similarity = 0
         pred_num=0
         for i in range(10):
-            tmp_img = cv2.imread(f'numbers/{i}.jpg')
+            tmp_img = cv2.imread(f'templates/numbers/{i}.jpg')
             tmp_img = cv2.cvtColor(tmp_img, cv2.COLOR_BGR2GRAY)
 
             res = cv2.matchTemplate(cut_image, tmp_img, cv2.TM_CCOEFF_NORMED)
@@ -243,7 +243,7 @@ if __name__ == '__main__':
 
     # 画像の計測テスト
     print("画像の計測テスト")
-    fetch_image = cv2.imread('images/robust4.jpg')
+    fetch_image = cv2.imread('debugging_images/robust4.jpg')
     result = cv2.matchTemplate(fetch_image, TEMPLATE, cv2.TM_CCOEFF_NORMED)
     # 検出結果から検出領域の位置を取得
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
