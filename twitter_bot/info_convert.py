@@ -4,14 +4,9 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from matplotlib.colors import LinearSegmentedColormap
 
-import re
 import datetime
 import numpy as np
 
-from PIL import Image
-import sys
-import pyocr.builders
-import image_processing
 
 THRESHOLD = 0.95
 TEMPLATE = cv2.imread('templates/running.jpg')
@@ -77,59 +72,6 @@ def read_cal_by_connectedComponets(image):
         kcal_str = kcal_str + str(pred_num)
     print(f"{kcal_str}kcalと推定します。")
     return int(kcal_str)
-
-def read_cal_by_tesseract(image):
-
-    image = image_processing.skew_image(image)
-
-    # 大津の二値化をしておく
-    im_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    _, image = cv2.threshold(im_gray, 0, 255, cv2.THRESH_OTSU)
-
-    image = Image.fromarray(image)
-
-
-    tools = pyocr.get_available_tools()
-    if len(tools) == 0:
-        print("No OCR tool found")
-        sys.exit(1)
-    # The tools are returned in the recommended order of usage
-    tool = tools[0]
-    langs = tool.get_available_languages()
-    print("Available languages: %s" % ", ".join(langs))
-    lang = langs[0]
-    print("Will use lang '%s'" % (langs))
-
-    txt = tool.image_to_string(
-        image,
-        lang=lang,
-        builder=pyocr.builders.TextBuilder(tesseract_layout=6)
-    )
-    print(txt)
-
-    # よくある誤字を修正
-    retext = txt.replace(' ', '').replace('i', '1').replace(']', '1').replace('t', '1') \
-        .replace('?', '2').replace('O', '0').replace('A', '4').replace('l', '1').replace('I', '1') \
-        .replace('Q', '9').replace('g', '9').replace('2/7', '27').replace('/', '7')
-
-    # 数字以外はすべて取り除き、intにする
-    try:
-        retext = int(re.sub('[^0-9]', '', retext))
-    except ValueError as e:
-        print("this is empty!")
-        retext = 0
-
-    # kcalが4桁はあり得ないのでエラー
-    try:
-        if (retext > 999):
-            raise ValueError("Cal is too large!")
-    except ValueError as e:
-        print(e)
-        retext = int(re.sub('[^0-9]', '', txt))
-
-    if str(retext) != txt: print(f"{txt} is replaced by {retext}.")
-    return int(retext)
-
 
 def is_result_image():
     fetch_image = cv2.imread('temp.jpg')
@@ -262,7 +204,5 @@ if __name__ == '__main__':
     # time = read_time(total_time)
     # dummyData
     time = datetime.time(second=0)
-
-    cal = read_cal_by_tesseract(total_cal)
 
     cal = read_cal_by_connectedComponets(total_cal)
