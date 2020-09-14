@@ -158,7 +158,7 @@ def tweet_ranking(api):
     params = (yesterday, )
 
     cur.execute("SELECT user_name,kcal "
-                "FROM (SELECT *, RANK() OVER(PARTITION BY user_screen_name ORDER BY kcal DESC, tweeted_time ASC) AS rnk FROM Exercise WHERE  date(datetime(time_stamp,'-4 hours')) == ?) tmp "
+                "FROM (SELECT *, RANK() OVER(PARTITION BY user_screen_name ORDER BY kcal DESC, tweeted_time ASC) AS rnk FROM Exercise WHERE  date(datetime(tweeted_time,'-4 hours')) == ?) tmp "
                 "WHERE rnk = 1 ORDER BY kcal DESC, tweeted_time ASC  LIMIT 10;",params)
 
 
@@ -201,22 +201,22 @@ def get_reply_message():
 
 def reply_exercise_result(api,cur,exercise_data,status):
 
-    now = datetime.datetime.now(JST)
-    ranking_datetime = now - datetime.timedelta(hours=4)
+    created_time = status.created_at+ datetime.timedelta(hours=9)
+    ranking_datetime = created_time - datetime.timedelta(hours=4)
     ranking_datetime = ranking_datetime.strftime("%Y-%m-%d")
     params=(ranking_datetime,)
 
     # DBから今日の順位分のデータを抽出し、消費カロリー順でソート
 
     cur.execute("select kcal from Exercise "
-                "WHERE date(datetime(time_stamp,'-4 hours'))==? ORDER BY kcal DESC ;",params)
+                "WHERE date(datetime(tweeted_time,'-4 hours'))==? ORDER BY kcal DESC ;",params)
     exercise_data_list = cur.fetchall()
     print(exercise_data)
 
     # 消費カロリーの順位を計算する
     params = (exercise_data.cal,ranking_datetime)
     cur.execute("select count(*) from Exercise WHERE Exercise.kcal > ? "
-                "AND date(datetime(time_stamp,'-4 hours'))==?", params)
+                "AND date(datetime(tweeted_time,'-4 hours'))==?", params)
     cal_ranking = int(cur.fetchone()[0])
     print(cal_ranking)
 
