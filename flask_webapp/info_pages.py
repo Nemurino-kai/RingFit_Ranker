@@ -1,7 +1,8 @@
 # coding: utf-8
-from flask import Flask, render_template,request, jsonify
+from flask import Flask, render_template,request
 from flask_bootstrap import Bootstrap
 from flask_paginate import Pagination, get_page_parameter
+from flask_cors import CORS
 import config
 import sqlite3
 import datetime
@@ -11,6 +12,8 @@ from info_api import module_api  #追加モジュール
 app = Flask(__name__)
 app.config["JSON_AS_ASCII"] = False
 bootstrap = Bootstrap(app)
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+
 # タイムゾーン指定
 JST = datetime.timezone(datetime.timedelta(hours=+9), 'JST')
 
