@@ -35,7 +35,7 @@ def api_index():
 
     print(params)
 
-    cur.execute("SELECT RANK() OVER(ORDER BY kcal DESC) AS ranking,user_name,kcal,tweeted_time "
+    cur.execute("SELECT id,RANK() OVER(ORDER BY kcal DESC) AS ranking,user_name,kcal,tweeted_time "
                 "FROM (SELECT *, RANK() OVER(PARTITION BY user_screen_name ORDER BY kcal DESC, id) AS rnk FROM Exercise WHERE   date(datetime(tweeted_time,'-4 hours'))==?) tmp "
                 "WHERE rnk = 1 ORDER BY kcal DESC, tweeted_time ASC;",params)
 
@@ -58,7 +58,7 @@ def api_user():
 
     cur.execute("WITH NonOverlapTable AS (SELECT *, RANK() OVER(PARTITION BY user_screen_name, date(datetime(tweeted_time,'-4 hours')) ORDER BY kcal DESC, id) AS rnk FROM Exercise)"
                 ",DailyRankedTable AS (SELECT *,RANK() OVER(PARTITION BY date(datetime(tweeted_time,'-4 hours')) ORDER BY kcal DESC) AS daily_rank FROM NonOverlapTable WHERE rnk = 1)"
-                "SELECT daily_rank,kcal,tweeted_time, strftime('%w', datetime(tweeted_time,'-4 hours')) AS weeknumber FROM DailyRankedTable WHERE rnk = 1 AND user_screen_name==? ORDER BY tweeted_time DESC;",params)
+                "SELECT id,daily_rank,kcal,tweeted_time, strftime('%w', datetime(tweeted_time,'-4 hours')) AS weeknumber FROM DailyRankedTable WHERE rnk = 1 AND user_screen_name==? ORDER BY tweeted_time DESC;",params)
 
     exercise_data_list = cur.fetchall()
 
