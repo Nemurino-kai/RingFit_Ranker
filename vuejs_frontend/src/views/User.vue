@@ -4,10 +4,10 @@
       <hr style="margin-top:0.5em;margin-bottom:1em;">
                 <form class="form-group form-inline">
                         <label>ユーザ名&nbsp;</label>
-                        <input type="text" placeholder="Input Username ..." name="user">
-                        &nbsp;<button type="submit"  class="btn btn-primary">集計する</button>
+                        <input type="text" placeholder="Input Username ..." v-model="user" name="user">
+                        &nbsp;<router-link v-bind:to="'/user/' + user" class="btn btn-primary">集計する</router-link>
                 </form>
-  <table class="table table-bordered">
+  <table class="table table-bordered" v-if="exercise_data.length != 0">
     <thead>
       <tr><th>Rank</th><th>kcal</th><th>Date</th></tr>
     </thead>
@@ -23,18 +23,26 @@
 </template>
 
 <script>
-import axios from 'axios'
-
 export default {
   data () {
     return {
+      user: '',
       exercise_data: []
     }
   },
-  mounted () {
-    axios.get('https://ringfit.work/api/user?user=aipQKAgOzRwoYGl').then(res => {
-      this.exercise_data = res['data']
-    })
+  created: function () {
+    if (this.$route.params.Username != null) {
+      this.$api.get('https://ringfit.work/api/user?user=' + this.$route.params.Username).then(res => {
+        this.exercise_data = res['data']
+      })
+    }
+  },
+  watch: {
+    $route (to, from) {
+      this.$api.get('https://ringfit.work/api/user?user=' + this.$route.params.Username).then(res => {
+        this.exercise_data = res['data']
+      })
+    }
   }
 }
 </script>

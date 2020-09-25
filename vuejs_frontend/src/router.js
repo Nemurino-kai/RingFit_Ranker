@@ -21,6 +21,10 @@ const router = new VueRouter({
       component: User
     },
     {
+      path: '/user/:Username',
+      component: User
+    },
+    {
       path: '/about',
       component: About
     }
