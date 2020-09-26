@@ -49,14 +49,18 @@ export default {
   },
   watch: {
     defaultDate: function (newDate) {
+      this.$store.commit('view/start')
       this.$api.get('https://ringfit.work/api?day=' + formatDate(newDate)).then(res => {
         this.exercise_data = res['data']
+        this.$store.commit('view/end')
       })
     }
   },
   created () {
+    this.$store.commit('view/start')
     this.$api.get('https://ringfit.work/api').then(res => {
       this.exercise_data = res['data']
+      this.$store.commit('view/end')
     })
   }
 }

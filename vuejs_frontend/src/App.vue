@@ -2,9 +2,12 @@
   <div id="app">
     <navbar></navbar>
     <!-- ここにパスと一致したコンポーネントが埋め込まれる -->
-    <transition name="view">
     <router-view />
-    </transition>
+    <!-- オーバーレイ用のコンポーネント -->
+    <Loading
+    :active.sync="this.$store.state.view.loading"
+    :is-full-page="true"
+    loader="bars"></Loading >
     <app-footer></app-footer>
   </div>
 </template>
