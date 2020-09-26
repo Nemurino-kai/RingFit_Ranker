@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Datepicker from 'vuejs-datepicker'
 import {ja} from 'vuejs-datepicker/dist/locale'
+import Loading from 'vue-loading-overlay'
 import { BootstrapVue, IconsPlugin, NavbarPlugin } from 'bootstrap-vue'
 import router from './router.js'
 import App from './App.vue'
@@ -9,6 +10,7 @@ import axios from 'axios'
 
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+import 'vue-loading-overlay/dist/vue-loading.css'
 
 Vue.use(BootstrapVue)
 
@@ -31,6 +33,12 @@ Datepicker.props.format.default = () => 'yyyy-MM-dd'
 Vue.use({
   install (Vue) {
     Vue.component('Datepicker', Datepicker)
+  }
+})
+
+Vue.use({
+  install (Vue) {
+    Vue.component('Loading', Loading)
   }
 })
 
