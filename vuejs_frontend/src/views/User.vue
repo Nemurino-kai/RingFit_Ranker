@@ -2,7 +2,7 @@
   <div class="user container">
   <h1>いままでの運動記録</h1>
       <hr style="margin-top:0.5em;margin-bottom:1em;">
-                <form class="form-group form-inline">
+                <form class="form-group form-inline" @submit.prevent="submitUsername">
                         <label>ユーザ名&nbsp;</label>
                         <input type="text" placeholder="Input Username ..." v-model="user" name="user">
                         &nbsp;<router-link v-bind:to="'/user/' + user" class="btn btn-primary">集計する</router-link>
@@ -30,17 +30,32 @@ export default {
       exercise_data: []
     }
   },
+  methods: {
+    submitUsername: function () {
+      this.$router.push(
+        {
+          path: '/user/' + this.user
+        }
+      )
+    }
+  },
   created: function () {
     if (this.$route.params.Username != null) {
+      this.$store.commit('view/start')
+      this.user = this.$route.params.Username
       this.$api.get('https://ringfit.work/api/user?user=' + this.$route.params.Username).then(res => {
         this.exercise_data = res['data']
+        this.$store.commit('view/end')
       })
     }
   },
   watch: {
     $route (to, from) {
+      this.$store.commit('view/start')
+      this.user = this.$route.params.Username
       this.$api.get('https://ringfit.work/api/user?user=' + this.$route.params.Username).then(res => {
         this.exercise_data = res['data']
+        this.$store.commit('view/end')
       })
     }
   }
