@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Datepicker from 'vuejs-datepicker'
 import {ja} from 'vuejs-datepicker/dist/locale'
 import Loading from 'vue-loading-overlay'
+import GoTop from '@inotom/vue-go-top'
 import { BootstrapVue, IconsPlugin, NavbarPlugin } from 'bootstrap-vue'
 import router from './router.js'
 import App from './App.vue'
@@ -39,6 +40,12 @@ Vue.use({
 Vue.use({
   install (Vue) {
     Vue.component('Loading', Loading)
+  }
+})
+
+Vue.use({
+  install (Vue) {
+    Vue.component('go-top', GoTop)
   }
 })
 

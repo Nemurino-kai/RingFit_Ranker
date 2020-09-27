@@ -27,6 +27,7 @@
       v-model="currentPage"
       :total-rows="rows"
       :per-page="perPage"
+      @page-click="goTop"
       aria-controls="exercise-table"
       align="center"
     ></b-pagination>
@@ -89,6 +90,12 @@ export default {
       if (day.length < 2) { day = '0' + day }
 
       return [year, month, day].join('-')
+    },
+    goTop: function () {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      })
     },
     readAPI: function (date) {
       var url = 'https://ringfit.work/api'
