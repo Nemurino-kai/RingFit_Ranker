@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <go-top :size=60 :bottom=50 bg-color="#000000"></go-top>
     <navbar></navbar>
     <!-- ここにパスと一致したコンポーネントが埋め込まれる -->
     <router-view />
