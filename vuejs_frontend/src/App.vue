@@ -20,6 +20,33 @@ export default {
   components: {
     'app-footer': Footer,
     Navbar
+  },
+  methods: {
+    createTitleDesc: function (routeInstance) {
+      // タイトルを設定
+      if (routeInstance.meta.title) {
+        var setTitle = routeInstance.meta.title
+        document.title = setTitle
+      } else {
+        document.title = 'RingFitRanker'
+      }
+      // メタタグdescription設定
+      if (routeInstance.meta.desc) {
+        var setDesc = routeInstance.meta.desc
+        document.querySelector("meta[name='description']").setAttribute('content', setDesc)
+      } else {
+        document.querySelector("meta[name='description']").setAttribute('content', 'description is not set')
+      }
+    }
+  },
+  mounted: function () {
+    var routeInstance = this.$route
+    this.createTitleDesc(routeInstance)
+  },
+  watch: {
+    '$route' (routeInstance, from) {
+      this.createTitleDesc(routeInstance)
+    }
   }
 }
 </script>
