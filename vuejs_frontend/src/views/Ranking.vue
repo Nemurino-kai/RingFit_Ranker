@@ -6,7 +6,7 @@
       <label>集計日&nbsp;</label>
       <Datepicker v-model="defaultDate" :disabled-dates="disabledDates"></Datepicker>
     </form>
-
+    <p class="mt-3" v-if='errored'>データを読み込めませんでした。ページを更新し直すか、時間をおいて再びアクセスしてください。</p>
   <div class="overflow-auto" v-if="exercise_data.length != 0">
     <b-pagination
       v-model="currentPage"
@@ -46,6 +46,7 @@ export default {
         to: new Date(2020, 5 - 1, 18),
         from: this.shiftDate()
       },
+      errored: false,
       exercise_data: [],
       start_day: '',
       stop_day: '',
@@ -107,8 +108,15 @@ export default {
         this.exercise_data = res['data']['exercise_data_list']
         this.start_day = res['data']['start_day']
         this.stop_day = res['data']['stop_day']
+        this.errored = false
         this.$store.commit('view/end')
       })
+        .catch(
+          error => {
+            console.log(error)
+            this.errored = true
+            this.$store.commit('view/end')
+          })
     }
   },
   watch: {
