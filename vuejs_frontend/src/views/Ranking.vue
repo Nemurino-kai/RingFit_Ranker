@@ -1,67 +1,121 @@
 <template>
   <div class="ranking container">
-    <h2 >Exercise Ranking</h2> <div class="text-muted">({{exercise_data.start_day}} 04:00:00 ～ {{exercise_data.stop_day}} 03:59:59)</div>
+    <h2 >Exercise Ranking</h2> <div class="text-muted">({{start_day}} 04:00:00 ～ {{stop_day}} 03:59:59)</div>
     <hr style="margin-top:0.5em;margin-bottom:1em;">
     <form class="form-group form-inline">
       <label>集計日&nbsp;</label>
       <Datepicker v-model="defaultDate" :disabled-dates="disabledDates"></Datepicker>
     </form>
 
-  <table class="table table-bordered" v-if="exercise_data.length != 0">
-    <thead>
-      <tr><th>Rank</th><th>Username</th><th>kcal</th><th>Date</th></tr>
-    </thead>
-    <tbody>
-      <tr v-for="user in exercise_data['exercise_data_list']" :key="user.id">
-        <td>{{user.ranking}}</td>
-        <td>{{user.user_name}}</td>
-        <td>{{user.kcal}}</td>
-        <td>{{user.tweeted_time}}</td>
-      </tr>
-    </tbody>
-  </table>  </div>
+  <div class="overflow-auto" v-if="exercise_data.length != 0">
+    <b-pagination
+      v-model="currentPage"
+      :total-rows="rows"
+      :per-page="perPage"
+      aria-controls="exercise-table"
+      align="center"
+    ></b-pagination>
+      <b-table striped hover caption-top
+      id="exercise-table"
+          :items="exercise_data"
+          :fields="columns"
+          :per-page="perPage"
+          :current-page="currentPage"
+          small
+    ></b-table>
+        <b-pagination
+      v-model="currentPage"
+      :total-rows="rows"
+      :per-page="perPage"
+      aria-controls="exercise-table"
+      align="center"
+    ></b-pagination>
+    <p class="mt-3" style="text-align:center;">displaying <b>{{(currentPage-1)* 100 + 1}} - {{Math.min(currentPage* 100, exercise_data.length)}}</b> records in total <b>{{exercise_data.length}}</b></p>
+  </div>
+
+</div>
 </template>
 
 <script>
-
-function formatDate (date) {
-  var d = new Date(date)
-  var month = '' + (d.getMonth() + 1)
-  var day = '' + d.getDate()
-  var year = d.getFullYear()
-
-  if (month.length < 2) { month = '0' + month }
-  if (day.length < 2) { day = '0' + day }
-
-  return [year, month, day].join('-')
-}
-
 export default {
   data () {
     return {
-      defaultDate: new Date(),
+      defaultDate: this.shiftDate(),
       disabledDates: {
         to: new Date(2020, 5 - 1, 18),
-        from: new Date()
+        from: this.shiftDate()
       },
-      exercise_data: []
+      exercise_data: [],
+      start_day: '',
+      stop_day: '',
+      currentPage: 1,
+      perPage: 100,
+      columns: [ {
+        label: 'Rank',
+        key: 'ranking',
+        sortable: true
+      },
+      {
+        label: 'Username',
+        key: 'user_name',
+        sortable: true
+      },
+      {
+        label: 'kcal',
+        key: 'kcal',
+        sortable: true
+      },
+      {
+        label: 'Date',
+        key: 'tweeted_time',
+        sortable: true
+      }]
     }
   },
-  watch: {
-    defaultDate: function (newDate) {
+  methods: {
+    // 4時間前の日付にシフトする
+    shiftDate: function () {
+      var shiftDate = new Date()
+      shiftDate.setHours(shiftDate.getHours() - 4)
+      return shiftDate
+    },
+    formatDate: function (date) {
+      var d = new Date(date)
+      var month = '' + (d.getMonth() + 1)
+      var day = '' + d.getDate()
+      var year = d.getFullYear()
+
+      if (month.length < 2) { month = '0' + month }
+      if (day.length < 2) { day = '0' + day }
+
+      return [year, month, day].join('-')
+    },
+    readAPI: function (date) {
+      var url = 'https://ringfit.work/api'
+      if (typeof date !== 'undefined') {
+        url = url + '?day=' + this.formatDate(date)
+      }
       this.$store.commit('view/start')
-      this.$api.get('https://ringfit.work/api?day=' + formatDate(newDate)).then(res => {
-        this.exercise_data = res['data']
+      this.$api.get(url).then(res => {
+        this.exercise_data = res['data']['exercise_data_list']
+        this.start_day = res['data']['start_day']
+        this.stop_day = res['data']['stop_day']
         this.$store.commit('view/end')
       })
     }
   },
+  watch: {
+    defaultDate: function (newDate) {
+      this.readAPI(newDate)
+    }
+  },
   created () {
-    this.$store.commit('view/start')
-    this.$api.get('https://ringfit.work/api').then(res => {
-      this.exercise_data = res['data']
-      this.$store.commit('view/end')
-    })
+    this.readAPI()
+  },
+  computed: {
+    rows () {
+      return this.exercise_data.length
+    }
   }
 }
 </script>
