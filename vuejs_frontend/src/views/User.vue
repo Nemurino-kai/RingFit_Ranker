@@ -7,6 +7,7 @@
                         <input type="text" placeholder="Input Username ..." v-model="user" name="user">
                         &nbsp;<router-link v-bind:to="'/user/' + user" class="btn btn-primary">集計する</router-link>
                 </form>
+      <p class="mt-3" v-if='errored'>データを読み込めませんでした。ページを更新し直すか、時間をおいて再びアクセスしてください。</p>
   <div class="overflow-auto" v-if="exercise_data.length != 0">
     <b-pagination
       v-model="currentPage"
@@ -43,6 +44,7 @@ export default {
     return {
       user: '',
       exercise_data: [],
+      errored: false,
       perPage: 100,
       currentPage: 1,
       columns: [ {
@@ -97,7 +99,12 @@ export default {
       this.$api.get('https://ringfit.work/api/user?user=' + this.$route.params.Username).then(res => {
         this.exercise_data = this.modifyAPIResponse(res)
         this.$store.commit('view/end')
-      })
+      }).catch(
+        error => {
+          console.log(error)
+          this.errored = true
+          this.$store.commit('view/end')
+        })
     }
   },
   created: function () {
