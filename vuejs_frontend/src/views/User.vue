@@ -29,6 +29,7 @@
       :per-page="perPage"
       aria-controls="user-exercise-table"
       align="center"
+      @page-click="goTop"
     ></b-pagination>
     <p class="mt-3" style="text-align:center;">displaying <b>{{(currentPage-1)* 100 + 1}} - {{Math.min(currentPage* 100, exercise_data.length)}}</b> records in total <b>{{exercise_data.length}}</b></p>
   </div>
@@ -68,6 +69,12 @@ export default {
           path: '/user/' + this.user
         }
       )
+    },
+    goTop: function () {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      })
     },
     modifyAPIResponse: function (res) {
       var modifyResult = res['data']['user_exercise_data_list']
