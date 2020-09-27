@@ -13,20 +13,24 @@ const router = new VueRouter({
     // 当日のランキングを表示
     {
       path: '/',
-      component: Ranking
+      component: Ranking,
+      meta: { title: 'Ranking', desc: '運動記録のデイリーランキングを表示します' }
     },
     // ユーザ毎の結果ページ
     {
       path: '/user',
-      component: User
+      component: User,
+      meta: { title: 'User', desc: '今までの運動記録をユーザ毎に表示します' }
     },
     {
       path: '/user/:Username',
-      component: User
+      component: User,
+      meta: { title: 'User', desc: '今までの運動記録をユーザ毎に表示します' }
     },
     {
       path: '/about',
-      component: About
+      component: About,
+      meta: { title: 'About', desc: 'RingFitRankerについての説明です' }
     }
   ]
 })
