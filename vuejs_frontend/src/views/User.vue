@@ -105,16 +105,22 @@ export default {
           this.errored = true
           this.$store.commit('view/end')
         })
+    },
+    checkParam: function () {
+      if (this.$route.params.Username != null) {
+        this.readAPI()
+      } else {
+        this.user = ''
+        this.exercise_data = []
+      }
     }
   },
   created: function () {
-    if (this.$route.params.Username != null) {
-      this.readAPI()
-    }
+    this.checkParam()
   },
   watch: {
     $route (to, from) {
-      this.readAPI()
+      this.checkParam()
     }
   },
   computed: {
