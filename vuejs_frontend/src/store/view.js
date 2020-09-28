@@ -5,11 +5,9 @@ export default {
   },
   mutations: {
     start (state) {
-      console.log('state true')
       state.loading = true
     },
     end (state) {
-      console.log('state false')
       state.loading = false
     }
   }
