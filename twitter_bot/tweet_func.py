@@ -35,13 +35,13 @@ def auth_twitter():
 
 
 # 運動記録をツイッター上から検索し、データベースに追加する, フォローしてくれている人にはリプライする。
-def search_exercise_data(api, max_number=300,interrupt=True):
+def search_exercise_data(api, max_number=300,interrupt=True,query='#リングフィットアドベンチャー -filter:retweets filter:images'):
     conn = sqlite3.connect(config.DATABASE_NAME)
     cur = conn.cursor()
     # フォローしてくれている人を取得
     follower_id = api.followers_ids()
 
-    for tweet in tweepy.Cursor(api.search, q=f'#リングフィットアドベンチャー -filter:retweets filter:images',tweet_mode="extended").items(max_number):
+    for tweet in tweepy.Cursor(api.search, q=query,tweet_mode="extended").items(max_number):
         print(tweet.id)
         # idが重複していたら、すでにそこまで検索してあるので中断
         cur.execute("select count(*) from Exercise where tweet_id == ?", (tweet.id,))
@@ -238,7 +238,7 @@ if __name__ == '__main__':
     cur = conn.cursor()
     # フォローしてくれている人を取得
     follower_id = api.followers_ids()
-    tweet = api.get_status(int(args[1]))
+    tweet = api.get_status(int(args[1]), tweet_mode='extended')
 
     # idが重複していたら、消去してよいか確認
     cur.execute("select count(*) from Exercise where tweet_id == ?", (tweet.id,))
