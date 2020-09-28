@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import VueAnalytics from 'vue-analytics'
 import Datepicker from 'vuejs-datepicker'
 import {ja} from 'vuejs-datepicker/dist/locale'
 import Loading from 'vue-loading-overlay'
@@ -19,6 +20,11 @@ Vue.use(BootstrapVue)
 Vue.use(IconsPlugin)
 
 Vue.use(NavbarPlugin)
+
+Vue.use(VueAnalytics, {
+  id: 'UA-168052698-1',
+  router
+})
 
 Vue.use({
   install (Vue) {
