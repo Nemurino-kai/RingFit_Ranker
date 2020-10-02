@@ -4,11 +4,11 @@
       <hr style="margin-top:0.5em;margin-bottom:1em;">
                 <form class="form-group form-inline" @submit.prevent="submitUsername">
                         <label>ユーザ名&nbsp;</label>
-                        <input type="text" placeholder="Input Username ..." v-model="user" name="user">
-                        &nbsp;<router-link v-bind:to="'/user/' + user" class="btn btn-primary">集計する</router-link>
+                        <input type="text" placeholder="Input Username ..." :value="userRank.user" name="user" ref="user">
+                        &nbsp;<button type="submit" class="btn btn-primary">集計する</button>
                 </form>
-      <p class="mt-3" v-if='errored'>データを読み込めませんでした。ページを更新し直すか、時間をおいて再びアクセスしてください。</p>
-  <div class="overflow-auto" v-if="exercise_data.length != 0">
+      <p class="mt-3" v-if='userRank.errored'>データを読み込めませんでした。ページを更新し直すか、時間をおいて再びアクセスしてください。</p>
+  <div class="overflow-auto" v-if="rows != 0">
     <b-pagination
       v-model="currentPage"
       :total-rows="rows"
@@ -18,7 +18,7 @@
     ></b-pagination>
       <b-table striped hover caption-top
       id="user-exercise-table"
-          :items="exercise_data"
+          :items="userRank.exercise_data"
           :fields="columns"
           :per-page="perPage"
           :current-page="currentPage"
@@ -32,19 +32,19 @@
       align="center"
       @page-click="goTop"
     ></b-pagination>
-    <p class="mt-3" style="text-align:center;">displaying <b>{{(currentPage-1)* 100 + 1}} - {{Math.min(currentPage* 100, exercise_data.length)}}</b> records in total <b>{{exercise_data.length}}</b></p>
+    <p class="mt-3" style="text-align:center;">displaying <b>{{(currentPage-1)* 100 + 1}} - {{Math.min(currentPage* 100, rows)}}</b> records in total <b>{{rows}}</b></p>
   </div>
 
   </div>
 </template>
 
 <script>
+import Chart from '@/components/Chart.vue'
+import { mapState } from 'vuex'
+
 export default {
   data () {
     return {
-      user: '',
-      exercise_data: [],
-      errored: false,
       perPage: 100,
       currentPage: 1,
       columns: [ {
@@ -68,7 +68,7 @@ export default {
     submitUsername: function () {
       this.$router.push(
         {
-          path: '/user/' + this.user
+          path: '/user/' + this.$refs.user.value
         }
       )
     },
@@ -78,40 +78,11 @@ export default {
         behavior: 'smooth'
       })
     },
-    modifyAPIResponse: function (res) {
-      var modifyResult = res['data']['user_exercise_data_list']
-      modifyResult = modifyResult.map(function (value) {
-        value['daily_rank'] = value['daily_rank'] + '位'
-        // 曜日に合わせて列の色を変える
-        if (value['weeknumber'] === '6') {
-          value['_rowVariant'] = 'info'
-        }
-        if (value['weeknumber'] === '0') {
-          value['_rowVariant'] = 'danger'
-        }
-        return value
-      })
-      return modifyResult
-    },
-    readAPI: function () {
-      this.$store.commit('view/start')
-      this.user = this.$route.params.Username
-      this.$api.get('https://ringfit.work/api/user?user=' + this.$route.params.Username).then(res => {
-        this.exercise_data = this.modifyAPIResponse(res)
-        this.$store.commit('view/end')
-      }).catch(
-        error => {
-          console.log(error)
-          this.errored = true
-          this.$store.commit('view/end')
-        })
-    },
     checkParam: function () {
       if (this.$route.params.Username != null) {
-        this.readAPI()
+        this.$store.dispatch('userRank/search', this.$route.params.Username)
       } else {
-        this.user = ''
-        this.exercise_data = []
+        this.$store.dispatch('userRank/reset')
       }
     }
   },
@@ -124,8 +95,9 @@ export default {
     }
   },
   computed: {
+    ...mapState(['userRank']),
     rows () {
-      return this.exercise_data.length
+      return this.$store.state.userRank.exercise_data.length
     }
   }
 }
