@@ -1,13 +1,13 @@
 <template>
   <div class="ranking container">
-    <h2 >Exercise Ranking</h2> <div class="text-muted">({{start_day}} 04:00:00 ～ {{stop_day}} 03:59:59)</div>
+    <h2 >Exercise Ranking</h2> <div class="text-muted">({{dailyRank.start_day}} 04:00:00 ～ {{dailyRank.stop_day}} 03:59:59)</div>
     <hr style="margin-top:0.5em;margin-bottom:1em;">
     <form class="form-group form-inline">
       <label>集計日&nbsp;</label>
-      <Datepicker v-model="defaultDate" :disabled-dates="disabledDates"></Datepicker>
+      <Datepicker v-model="defaultDate" :disabled-dates="dailyRank.disabledDates"></Datepicker>
     </form>
-    <p class="mt-3" v-if='errored'>データを読み込めませんでした。ページを更新し直すか、時間をおいて再びアクセスしてください。</p>
-  <div class="overflow-auto" v-if="exercise_data.length != 0">
+    <p class="mt-3" v-if='dailyRank.errored'>データを読み込めませんでした。ページを更新し直すか、時間をおいて再びアクセスしてください。</p>
+  <div class="overflow-auto" v-if="rows != 0">
     <b-pagination
       v-model="currentPage"
       :total-rows="rows"
@@ -17,7 +17,7 @@
     ></b-pagination>
       <b-table striped hover caption-top
       id="exercise-table"
-          :items="exercise_data"
+          :items="dailyRank.exercise_data"
           :fields="columns"
           :per-page="perPage"
           :current-page="currentPage"
@@ -31,25 +31,18 @@
       aria-controls="exercise-table"
       align="center"
     ></b-pagination>
-    <p class="mt-3" style="text-align:center;">displaying <b>{{(currentPage-1)* 100 + 1}} - {{Math.min(currentPage* 100, exercise_data.length)}}</b> records in total <b>{{exercise_data.length}}</b></p>
+    <p class="mt-3" style="text-align:center;">displaying <b>{{(currentPage-1)* 100 + 1}} - {{Math.min(currentPage* 100, rows)}}</b> records in total <b>{{rows}}</b></p>
   </div>
 
 </div>
 </template>
 
 <script>
+import { mapState } from 'vuex'
+
 export default {
   data () {
     return {
-      defaultDate: this.shiftDate(),
-      disabledDates: {
-        to: new Date(2020, 5 - 1, 18),
-        from: this.shiftDate()
-      },
-      errored: false,
-      exercise_data: [],
-      start_day: '',
-      stop_day: '',
       currentPage: 1,
       perPage: 100,
       columns: [ {
@@ -75,12 +68,6 @@ export default {
     }
   },
   methods: {
-    // 4時間前の日付にシフトする
-    shiftDate: function () {
-      var shiftDate = new Date()
-      shiftDate.setHours(shiftDate.getHours() - 4)
-      return shiftDate
-    },
     formatDate: function (date) {
       var d = new Date(date)
       var month = '' + (d.getMonth() + 1)
@@ -97,40 +84,26 @@ export default {
         top: 0,
         behavior: 'smooth'
       })
-    },
-    readAPI: function (date) {
-      var url = 'https://ringfit.work/api'
-      if (typeof date !== 'undefined') {
-        url = url + '?day=' + this.formatDate(date)
-      }
-      this.$store.commit('view/start')
-      this.$api.get(url).then(res => {
-        this.exercise_data = res['data']['exercise_data_list']
-        this.start_day = res['data']['start_day']
-        this.stop_day = res['data']['stop_day']
-        this.errored = false
-        this.$store.commit('view/end')
-      })
-        .catch(
-          error => {
-            console.log(error)
-            this.errored = true
-            this.$store.commit('view/end')
-          })
-    }
-  },
-  watch: {
-    defaultDate: function (newDate) {
-      this.readAPI(newDate)
     }
   },
   created () {
-    this.readAPI()
+    // データが無ければ、集計する
+    if (this.$store.state.dailyRank.exercise_data.length === 0) {
+      this.$store.dispatch('dailyRank/search', this.formatDate(new Date(new Date() - (1000 * 60 * 60 * 4))))
+    }
   },
   computed: {
+    ...mapState(['dailyRank']),
     rows () {
-      return this.exercise_data.length
+      return this.$store.state.dailyRank.exercise_data.length
+    },
+    defaultDate: {
+      get () { return this.$store.state.dailyRank.defaultDate },
+      set (value) {
+        this.$store.dispatch('dailyRank/search', this.formatDate(value))
+      }
     }
+
   }
 }
 </script>
