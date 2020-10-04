@@ -8,6 +8,8 @@
                         &nbsp;<button type="submit" class="btn btn-primary">集計する</button>
                 </form>
       <p class="mt-3" v-if='userRank.errored'>データを読み込めませんでした。ページを更新し直すか、時間をおいて再びアクセスしてください。</p>
+
+  <chart v-if="userRank.exercise_data != 0"></chart><br>
   <div class="overflow-auto" v-if="rows != 0">
     <b-pagination
       v-model="currentPage"
@@ -43,6 +45,9 @@ import Chart from '@/components/Chart.vue'
 import { mapState } from 'vuex'
 
 export default {
+  components: {
+    Chart
+  },
   data () {
     return {
       perPage: 100,
