@@ -3,6 +3,7 @@ import VueAnalytics from 'vue-analytics'
 import Datepicker from 'vuejs-datepicker'
 import {ja} from 'vuejs-datepicker/dist/locale'
 import Loading from 'vue-loading-overlay'
+import moment from 'vue-moment'
 import GoTop from '@inotom/vue-go-top'
 import { BootstrapVue, IconsPlugin, NavbarPlugin } from 'bootstrap-vue'
 import router from './router.js'
@@ -13,6 +14,8 @@ import axios from 'axios'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import 'vue-loading-overlay/dist/vue-loading.css'
+
+Vue.use(moment)
 
 Vue.use(BootstrapVue)
 

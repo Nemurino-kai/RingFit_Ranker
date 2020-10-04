@@ -68,17 +68,6 @@ export default {
     }
   },
   methods: {
-    formatDate: function (date) {
-      var d = new Date(date)
-      var month = '' + (d.getMonth() + 1)
-      var day = '' + d.getDate()
-      var year = d.getFullYear()
-
-      if (month.length < 2) { month = '0' + month }
-      if (day.length < 2) { day = '0' + day }
-
-      return [year, month, day].join('-')
-    },
     goTop: function () {
       window.scrollTo({
         top: 0,
@@ -89,7 +78,7 @@ export default {
   created () {
     // データが無ければ、集計する
     if (this.$store.state.dailyRank.exercise_data.length === 0) {
-      this.$store.dispatch('dailyRank/search', this.formatDate(new Date(new Date() - (1000 * 60 * 60 * 4))))
+      this.$store.dispatch('dailyRank/search', this.$moment().subtract(4, 'hours').format('YYYY-MM-DD'))
     }
   },
   computed: {
