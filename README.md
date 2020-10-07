@@ -7,8 +7,8 @@ https://twitter.com/RingFitRanker で運営中
 ## 機能１
 - アカウントをフォローしたうえで、<b>#リングフィットアドベンチャー</b> タグを付けて運動結果をツイートすると、順位をリプライします。
 
-![image1](https://user-images.githubusercontent.com/40136659/82156108-2e819180-98b4-11ea-9bab-dbfe2e5b1b84.jpg)
-![image2](https://user-images.githubusercontent.com/40136659/82156109-304b5500-98b4-11ea-852a-880a3031e7db.jpg)
+![moto](https://user-images.githubusercontent.com/40136659/95277065-ddd0fc00-0887-11eb-9ece-bee6b76955fe.jpg)
+![mame](https://user-images.githubusercontent.com/40136659/95277166-196bc600-0888-11eb-8666-43365546de63.jpg)
 
 ## 機能２
 - 毎日4時に順位を集計し、12時頃に消費カロリー数ランキング Top10を画像で呟きます。
