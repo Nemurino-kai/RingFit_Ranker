@@ -7,8 +7,8 @@ https://twitter.com/RingFitRanker で運営中
 ## 機能１
 - アカウントをフォローしたうえで、<b>#リングフィットアドベンチャー</b> タグを付けて運動結果をツイートすると、順位をリプライします。
 
-![image1](https://user-images.githubusercontent.com/40136659/82156108-2e819180-98b4-11ea-9bab-dbfe2e5b1b84.jpg)
-![image2](https://user-images.githubusercontent.com/40136659/82156109-304b5500-98b4-11ea-852a-880a3031e7db.jpg)
+![moto](https://user-images.githubusercontent.com/40136659/95277065-ddd0fc00-0887-11eb-9ece-bee6b76955fe.jpg)
+![mame](https://user-images.githubusercontent.com/40136659/95277166-196bc600-0888-11eb-8666-43365546de63.jpg)
 
 ## 機能２
 - 毎日4時に順位を集計し、12時頃に消費カロリー数ランキング Top10を画像で呟きます。
@@ -21,12 +21,12 @@ https://twitter.com/RingFitRanker で運営中
 ![all](https://user-images.githubusercontent.com/40136659/83976183-6c158f80-a933-11ea-826c-5eafd284278b.png)
 
 ## 機能４
-- https://ringfit.work/user から、Twitterの@ユーザ名を入力することで、いままでの運動記録を見ることができます。
-![user](https://user-images.githubusercontent.com/40136659/85702894-cecf9f00-b719-11ea-9124-abbf45b68860.jpg)
+- https://ringfit.work/#/user/ から、Twitterの@ユーザ名を入力することで、いままでの運動記録と、消費カロリーのグラフを見ることができます。
+![graph2](https://user-images.githubusercontent.com/40136659/95273961-7020d200-087f-11eb-87d0-e8b76e266791.png)
 
 ## 開発者向けのメッセージ
 ### システム構成図
-![ranker](https://user-images.githubusercontent.com/40136659/82590990-977d4800-9bd9-11ea-898a-369598a34226.png)
+![zu](https://user-images.githubusercontent.com/40136659/95276667-d3fac900-0886-11eb-94bf-2c1983e9d90c.png)
 
 ### 使用方法
 twitter_bot/tweet_bot_cron.py を実行すると、<b>#リングフィットアドベンチャー</b> の画像を検索・集計し、順位をリプライします。<br>
@@ -49,4 +49,6 @@ RANKING_FONT = "ランキング画像のユーザ名に用いるフォント"
 KCAL_FONT = "ランキング画像の消費カロリーに用いるフォント"
 ```
 
-flask_webapp/info_pages.py は、flaskにより作られたWebアプリです。消費カロリーの順位などを見ることができます。
+flask_webapp/info_pages.py は、Flaskにより作られたサーバサイドアプリケーションです。消費カロリーの順位などを取得できる、APIが実装されています。
+
+vuejs_frontend ディレクトリは、Vue CLIにより作成されたSPAのプロジェクトです。Flaskで作成したAPIにアクセスすることで動作します。
