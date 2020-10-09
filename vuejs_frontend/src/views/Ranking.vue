@@ -89,7 +89,7 @@ export default {
     defaultDate: {
       get () { return this.$store.state.dailyRank.defaultDate },
       set (value) {
-        this.$store.dispatch('dailyRank/search', this.formatDate(value))
+        this.$store.dispatch('dailyRank/search', this.$moment(value).format('YYYY-MM-DD'))
       }
     }
 
