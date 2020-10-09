@@ -55,7 +55,13 @@ def search_exercise_data(api, max_number=300,interrupt=True,query='#リングフ
             # 画像から運動記録を読み取る
             exercise_data = info_convert.image_to_data(image_type)
             # DBに運動記録を追加
-            params = (exercise_data.cal,tweet.user.name,tweet.user.screen_name,tweet.id,tweet.created_at+ datetime.timedelta(hours=9))
+            tweet.created_at = tweet.created_at + datetime.timedelta(hours=9)
+            # もし"#昨日の分"と書かれていたら、日付を昨日に変える
+            if '#昨日の分' in tweet.full_text:
+                tweet.created_at = tweet.created_at - datetime.timedelta(days=1)
+            print(tweet.created_at)
+            print(tweet)
+            params = (exercise_data.cal,tweet.user.name,tweet.user.screen_name,tweet.id,tweet.created_at)
             cur.execute(
                 "insert into Exercise (kcal,user_name,user_screen_name,tweet_id,tweeted_time) "
                 "values (?,?,?,?,?) ",params
@@ -204,9 +210,15 @@ def reply_exercise_result(api,cur,exercise_data,status):
     created_time = status.created_at+ datetime.timedelta(hours=9)
     ranking_datetime = created_time - datetime.timedelta(hours=4)
     ranking_datetime = ranking_datetime.strftime("%Y-%m-%d")
+    today_datetime = datetime.datetime.now(JST).strftime("%Y-%m-%d")
+    if ranking_datetime == today_datetime:
+        prefix = "今日"
+    else:
+        prefix = ranking_datetime
+
     params=(ranking_datetime,)
 
-    # DBから今日の順位分のデータを抽出し、消費カロリー順でソート
+    # DBから当日の順位分のデータを抽出し、消費カロリー順でソート
 
     cur.execute("select kcal from Exercise "
                 "WHERE date(datetime(tweeted_time,'-4 hours'))==? ORDER BY kcal DESC ;",params)
@@ -222,7 +234,7 @@ def reply_exercise_result(api,cur,exercise_data,status):
 
     tweet = "@" + str(status.user.screen_name) + '\n'
     tweet += str(exercise_data.cal) + "kcal消費 "+ get_reply_message() + "\n"
-    tweet += f"今日の順位 {cal_ranking + 1}位/{len(exercise_data_list)}人中"
+    tweet += f"{prefix}の順位 {cal_ranking + 1}位/{len(exercise_data_list)}人中"
     print(exercise_data_list)
     info_convert.datalist_to_histogram(info_convert.convert_datatuple_to_list(exercise_data_list),
                                        cal_ranking)
@@ -261,7 +273,12 @@ if __name__ == '__main__':
         print(f"{exercise_data.cal}kcal と予測しました。")
         kcal_flag=input("If cal is wrong, enter cal. If cal is correct, enter y.(y or number):")
         if kcal_flag != "y": exercise_data.cal = int(kcal_flag)
-    params = (exercise_data.cal,tweet.user.name,tweet.user.screen_name,tweet.id,tweet.created_at+ datetime.timedelta(hours=9))
+
+    tweet.created_at = tweet.created_at+ datetime.timedelta(hours=9)
+    # もし"#昨日の分"と書かれていたら、日付を昨日に変える
+    if '#昨日の分' in tweet.full_text:
+        tweet.created_at = tweet.created_at - datetime.timedelta(days=1)
+    params = (exercise_data.cal,tweet.user.name,tweet.user.screen_name,tweet.id,tweet.created_at)
     cur.execute(
                     "insert into Exercise (kcal,user_name,user_screen_name,tweet_id,tweeted_time) "
                     "values (?,?,?,?,?) ",params
