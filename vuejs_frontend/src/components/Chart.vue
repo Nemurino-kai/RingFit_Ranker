@@ -10,6 +10,7 @@ export default {
     return {
       data: {
         labels: [],
+        titles: [],
         datasets: [
           {
             label: '消費カロリー',
@@ -27,15 +28,21 @@ export default {
           enabled: true,
           mode: 'x',
           rangeMin: {
-            x: new Date(2020, 5 - 1, 18)
+            x: new Date('2020-05-17')
           },
           rangeMax: {
-            x: new Date() - (1000 * 60 * 60 * 4) + (1000 * 60 * 60 * 24)
+            x: new Date() - (1000 * 60 * 60 * 4)
           }
         },
         zoom: {
           enabled: true,
-          mode: 'x'
+          mode: 'x',
+          rangeMin: {
+            x: new Date('2020-05-17')
+          },
+          rangeMax: {
+            x: new Date() - (1000 * 60 * 60 * 4)
+          }
         },
         responsive: true,
         maintainAspectRatio: false,
@@ -46,15 +53,15 @@ export default {
               displayFormats: {
                 day: 'M/D'
               },
-              round: 'day'
+              unit: 'day'
             },
             scaleLabel: {
               display: true,
               labelString: 'Date'
             },
             ticks: {
-              min: new Date() - (1000 * 60 * 60 * 4) - (1000 * 60 * 60 * 24 * 30),
-              max: new Date() - (1000 * 60 * 60 * 4) + (1000 * 60 * 60 * 24)
+              min: this.$moment().subtract(4, 'hours').subtract(30, 'days'),
+              max: this.$moment().subtract(4, 'hours')
             }
           }],
           yAxes: [{
@@ -73,7 +80,7 @@ export default {
     {
       title: function (array, data) {
         // labelの形式が RFC2822 or ISO format に従わないため、直接渡すとエラーがでる。そのため一旦Dateに変換する。
-        return this.restoreDate(new Date(array[0]['label'])).format('M/D A h:mm')
+        return this.data.titles[array[0]['index']]
       }.bind(this)
     }
         }
@@ -104,7 +111,8 @@ export default {
   methods: {
     calculateChart: function () {
       // ランキング算定時の日数に合わせるため、4時間引く
-      this.data.labels = this.exercise_data.map(x => this.$moment(x['tweeted_time']).subtract(4, 'hours'))
+      this.data.labels = this.exercise_data.map(x => this.$moment(x['tweeted_time']).subtract(4, 'hours').format('YYYY-MM-DD'))
+      this.data.titles = this.exercise_data.map(x => this.$moment(x['tweeted_time']).format('M/D A h:mm'))
       this.data.datasets[0].data = this.exercise_data.map(x => x['kcal'])
     },
     restoreDate: function (date) {
