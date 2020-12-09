@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 import view from '@/store/view.js'
 import userRank from '@/store/userRank.js'
 import dailyRank from '@/store/dailyRank.js'
+import monthlyRank from '@/store/monthlyRank.js'
 
 Vue.use(Vuex)
 
@@ -10,6 +11,7 @@ export default new Vuex.Store({
   modules: {
     view,
     userRank,
-    dailyRank
+    dailyRank,
+    monthlyRank
   }
 })

@@ -1,21 +1,21 @@
 <template>
   <div class="ranking container">
-    <h2 >Exercise Ranking</h2> <div class="text-muted">({{dailyRank.start_day}} 04:00:00 ～ {{dailyRank.stop_day}} 03:59:59)</div>
+    <h2 >Monthly Exercise Ranking</h2> <div class="text-muted">({{monthlyRank.start_day}} 04:00:00 ～ {{monthlyRank.stop_day}} 03:59:59)</div>
 <br>
 
 <div>
   <label>集計期間&nbsp;</label>
-  <b-button variant="primary" to="/" size="sm">Daily</b-button>
-  <b-button variant="outline-primary" to="/monthly" size="sm">Monthly</b-button>
+  <b-button variant="outline-primary" to="/" size="sm">Daily</b-button>
+  <b-button variant="primary" to="/monthly" size="sm">Monthly</b-button>
 </div>
 
     <hr style="margin-top:0.5em;margin-bottom:1em;">
 
     <form class="form-group form-inline">
-      <label>集計日&nbsp;</label>
-      <Datepicker v-model="defaultDate" :disabled-dates="dailyRank.disabledDates"></Datepicker>
+      <label>集計月&nbsp;</label>
+      <Datepicker v-model="defaultDate" :disabled-dates="monthlyRank.disabledDates" :minimumView="'month'" :format="'yyyy-MM'"></Datepicker>
     </form>
-    <p class="mt-3" v-if='dailyRank.errored'>データを読み込めませんでした。ページを更新し直すか、時間をおいて再びアクセスしてください。</p>
+    <p class="mt-3" v-if='monthlyRank.errored'>データを読み込めませんでした。ページを更新し直すか、時間をおいて再びアクセスしてください。</p>
   <div class="overflow-auto" v-if="rows != 0">
     <b-pagination
       v-model="currentPage"
@@ -26,7 +26,7 @@
     ></b-pagination>
       <b-table striped hover caption-top
       id="exercise-table"
-          :items="dailyRank.exercise_data"
+          :items="monthlyRank.exercise_data"
           :fields="columns"
           :per-page="perPage"
           :current-page="currentPage"
@@ -66,12 +66,12 @@ export default {
       },
       {
         label: 'kcal',
-        key: 'kcal',
+        key: 'monthly_kcal',
         sortable: true
       },
       {
-        label: 'Date',
-        key: 'tweeted_time',
+        label: '運動日数',
+        key: 'days',
         sortable: true
       }]
     }
@@ -85,20 +85,21 @@ export default {
     }
   },
   created () {
+    console.log(this.$moment().subtract(4, 'hours').format('YYYY-MM'))
     // データが無ければ、集計する
-    if (this.$store.state.dailyRank.exercise_data.length === 0) {
-      this.$store.dispatch('dailyRank/search', this.$moment().subtract(4, 'hours').format('YYYY-MM-DD'))
+    if (this.$store.state.monthlyRank.exercise_data.length === 0) {
+      this.$store.dispatch('monthlyRank/search', this.$moment().subtract(4, 'hours').format('YYYY-MM'))
     }
   },
   computed: {
-    ...mapState(['dailyRank']),
+    ...mapState(['monthlyRank']),
     rows () {
-      return this.$store.state.dailyRank.exercise_data.length
+      return this.$store.state.monthlyRank.exercise_data.length
     },
     defaultDate: {
-      get () { return this.$store.state.dailyRank.defaultDate },
+      get () { return this.$store.state.monthlyRank.defaultDate },
       set (value) {
-        this.$store.dispatch('dailyRank/search', this.$moment(value).format('YYYY-MM-DD'))
+        this.$store.dispatch('monthlyRank/search', this.$moment(value).format('YYYY-MM'))
         this.currentPage = 1
       }
     }
