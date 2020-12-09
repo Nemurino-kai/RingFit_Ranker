@@ -64,7 +64,7 @@ def api_monthly():
     if month is not None:
         start_day = month + "-01"
 
-    stop_day = (datetime.datetime.strptime(start_day,"%Y-%m-%d") + relativedelta(months=1) - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+    stop_day = (datetime.datetime.strptime(start_day,"%Y-%m-%d") + relativedelta(months=1)).strftime("%Y-%m-%d")
     params=(start_day,)
 
     print(params)
