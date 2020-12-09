@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 // ルート用のコンポーネントを読み込む
 import Ranking from '@/views/Ranking'
+import MonthlyRanking from '@/views/MonthlyRanking'
 import User from '@/views/User'
 import About from '@/views/About'
 import store from './store.js'
@@ -15,6 +16,12 @@ const router = new VueRouter({
       path: '/',
       component: Ranking,
       meta: { title: 'Ranking', desc: '運動記録のデイリーランキングを表示します' }
+    },
+    // 月別のランキングを表示
+    {
+      path: '/monthly',
+      component: MonthlyRanking,
+      meta: { title: 'Monthly Ranking', desc: '運動記録の月別ランキングを表示します' }
     },
     // ユーザ毎の結果ページ
     {
