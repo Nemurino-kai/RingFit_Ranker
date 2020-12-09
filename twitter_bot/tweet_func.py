@@ -35,7 +35,7 @@ def auth_twitter():
 
 
 # 運動記録をツイッター上から検索し、データベースに追加する, フォローしてくれている人にはリプライする。
-def search_exercise_data(api, max_number=300,interrupt=True,query='#リングフィットアドベンチャー -filter:retweets filter:images'):
+def search_exercise_data(api, max_number=300,interrupt=True,query='#リングフィットアドベンチャー -filter:retweets filter:images -@tos'):
     conn = sqlite3.connect(config.DATABASE_NAME)
     cur = conn.cursor()
     # フォローしてくれている人を取得
