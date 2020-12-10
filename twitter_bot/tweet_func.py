@@ -207,8 +207,7 @@ def get_reply_message():
 
 def reply_exercise_result(api,cur,exercise_data,status):
 
-    created_time = status.created_at+ datetime.timedelta(hours=9)
-    ranking_datetime = created_time - datetime.timedelta(hours=4)
+    ranking_datetime = status.created_at - datetime.timedelta(hours=4)
     ranking_datetime = ranking_datetime.strftime("%Y-%m-%d")
     today_datetime = datetime.datetime.now(JST).strftime("%Y-%m-%d")
     if ranking_datetime == today_datetime:
