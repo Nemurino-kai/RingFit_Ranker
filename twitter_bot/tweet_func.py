@@ -152,8 +152,25 @@ def make_ranking_picture(exercise_data_list):
 
     im.save("ranking_picture.png")
 
+# idのリストからユーザ情報のリストを返す関数
+def lookup_user_list(user_id_list, api):
+    full_users = []
+    users_count = len(user_id_list)
+    try:
+     for i in range((users_count-1)//100 + 1):
+      full_users.extend(api.lookup_users(user_ids=user_id_list[i*100:min((i+1)*100, users_count)]))
+     return full_users
+    except tweepy.TweepError:
+     print('Something went wrong, quitting...')
+
 # 運動記録のランキングをツイートする
 def tweet_ranking(api):
+    # フォローしてくれている人を取得
+    follower_ids = api.followers_ids()
+    print(follower_ids)
+    # idからscreen_nameに変換
+    follower_names = [user.screen_name for user in lookup_user_list(follower_ids,api)]
+
     conn = sqlite3.connect(config.DATABASE_NAME)
     cur = conn.cursor()
     # DBから前日分の運動結果を抽出し、消費カロリーの多い順でソート
@@ -161,11 +178,12 @@ def tweet_ranking(api):
     now = datetime.datetime.now(JST)
     yesterday = now - datetime.timedelta(days=1)
     yesterday = yesterday.strftime("%Y-%m-%d")
-    params = (yesterday, )
+    params = (yesterday,) +tuple(follower_names)
 
+    # フォロワー内のみでTOP10を集計
     cur.execute("SELECT user_name,kcal "
-                "FROM (SELECT *, RANK() OVER(PARTITION BY user_screen_name ORDER BY kcal DESC, tweeted_time ASC) AS rnk FROM Exercise WHERE  date(datetime(tweeted_time,'-4 hours')) == ?) tmp "
-                "WHERE rnk = 1 ORDER BY kcal DESC, tweeted_time ASC  LIMIT 10;",params)
+                "FROM (SELECT *, RANK() OVER(PARTITION BY user_screen_name ORDER BY kcal DESC, tweeted_time ASC) AS rnk FROM Exercise WHERE date(datetime(tweeted_time,'-4 hours')) == ? AND user_screen_name IN (%s)) tmp "
+                "WHERE rnk = 1 ORDER BY kcal DESC, tweeted_time ASC  LIMIT 10;"% ("?," * len(follower_names))[:-1],params)
 
 
     exercise_data_list = cur.fetchall()
