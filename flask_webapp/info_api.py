@@ -69,7 +69,7 @@ def api_monthly():
 
     print(params)
 
-    cur.execute("SELECT id,RANK() OVER(ORDER BY SUM(kcal) DESC) AS ranking,user_name,SUM(kcal) AS monthly_kcal "
+    cur.execute("SELECT id,RANK() OVER(ORDER BY SUM(kcal) DESC) AS ranking,user_name,SUM(kcal) AS monthly_kcal,COUNT(user_name) AS days "
                 "FROM (SELECT *, RANK() OVER(PARTITION BY [user_screen_name],[tweeted_date] ORDER BY kcal DESC, id) AS rnk "
                 "FROM (SELECT *, strftime('%Y-%m-%d',datetime(tweeted_time,'-4 hours')) AS tweeted_date FROM Exercise) WHERE strftime('%Y-%m',datetime(tweeted_time,'-4 hours')) == strftime('%Y-%m',?)) tmp "
                 "WHERE rnk = 1 GROUP BY user_screen_name ORDER BY monthly_kcal DESC, tweeted_time ASC ;",params)
