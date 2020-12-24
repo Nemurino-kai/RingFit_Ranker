@@ -2,7 +2,7 @@
 Twitter上の <b>#リングフィットアドベンチャー</b> の画像を収集し、順位を呟くbotです<br>
 https://twitter.com/RingFitRanker で運営中
 
-現在、[サーバレス版](https://github.com/Nemurino-kai/RingFit_Ranker_Serverless)を開発しています、将来的に移行予定です。
+現在、[サーバレス版](https://github.com/Nemurino-kai/RingFit_Ranker_Serverless)の開発も行っています。
 
 ## 機能１
 - アカウントをフォローしたうえで、<b>#リングフィットアドベンチャー</b> タグを付けて運動結果をツイートすると、順位をリプライします。
