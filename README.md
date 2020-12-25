@@ -18,7 +18,7 @@ https://twitter.com/RingFitRanker で運営中
 ## 機能３
 - https://ringfit.work から、全員分の順位が見れます。
 - 過去の日付の順位を見ることも可能です。ページネーションに対応しています。
-![all](https://user-images.githubusercontent.com/40136659/83976183-6c158f80-a933-11ea-826c-5eafd284278b.png)
+![rank](https://user-images.githubusercontent.com/40136659/103138235-d0ebd800-4713-11eb-8a1e-607b83daa477.png)
 
 ## 機能４
 - https://ringfit.work/#/user/ から、Twitterの@ユーザ名を入力することで、いままでの運動記録と、消費カロリーのグラフを見ることができます。
