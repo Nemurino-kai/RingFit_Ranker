@@ -1,4 +1,6 @@
 # RingFit_Ranker
+[![Netlify Status](https://api.netlify.com/api/v1/badges/2bd9f8b4-7b47-4709-a83a-e709afeff1f6/deploy-status)](https://app.netlify.com/sites/stoic-lalande-7a6e38/deploys)
+
 Twitter上の <b>#リングフィットアドベンチャー</b> の画像を収集し、順位を呟くbotです<br>
 https://twitter.com/RingFitRanker で運営中
 
