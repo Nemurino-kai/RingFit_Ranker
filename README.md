@@ -26,7 +26,8 @@ https://twitter.com/RingFitRanker で運営中
 
 ## 開発者向けのメッセージ
 ### システム構成図
-![zu](https://user-images.githubusercontent.com/40136659/95276667-d3fac900-0886-11eb-94bf-2c1983e9d90c.png)
+![system](https://user-images.githubusercontent.com/40136659/103153838-d3633600-47d6-11eb-874e-7b5f98d8652f.png)
+
 
 ### 使用方法
 twitter_bot/tweet_bot_cron.py を実行すると、<b>#リングフィットアドベンチャー</b> の画像を検索・集計し、順位をリプライします。<br>
