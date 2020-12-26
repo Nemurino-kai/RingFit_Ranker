@@ -28,7 +28,7 @@ export default {
   },
   actions: {
     search ({ commit }, date) {
-      var url = 'https://ringfit.work/api'
+      var url = 'https://api.ringfit.work/api'
       if (typeof date !== 'undefined') {
         url = url + '?day=' + date
         commit('set_default_date', date)

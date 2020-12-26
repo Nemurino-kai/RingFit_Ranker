@@ -37,7 +37,7 @@ export default {
         commit('view/start', null, { root: true })
         commit('set_user', userName)
 
-        this._vm.$api.get('https://ringfit.work/api/user?user=' + userName).then(res => {
+        this._vm.$api.get('https://api.ringfit.work/api/user?user=' + userName).then(res => {
           commit('set_modified_exercise_data', res)
           commit('set_errored', false)
           commit('view/end', null, { root: true })
