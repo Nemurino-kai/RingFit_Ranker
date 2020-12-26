@@ -32,7 +32,7 @@ Vue.use(VueAnalytics, {
 Vue.use({
   install (Vue) {
     Vue.prototype.$api = axios.create({
-      baseURL: 'https://ringfit.work/api'
+      baseURL: 'https://api.ringfit.work/api'
     })
   }
 })

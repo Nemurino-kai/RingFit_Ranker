@@ -34,7 +34,7 @@ export default {
   },
   actions: {
     search ({ commit }, date) {
-      var url = 'https://ringfit.work/api/monthly'
+      var url = 'https://api.ringfit.work/api/monthly'
       if (typeof date !== 'undefined') {
         url = url + '?month=' + date
         commit('set_default_date', date)
