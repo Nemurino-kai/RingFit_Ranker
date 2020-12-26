@@ -28,7 +28,7 @@ https://twitter.com/RingFitRanker で運営中
 
 ## 開発者向けのメッセージ
 ### システム構成図
-![system](https://user-images.githubusercontent.com/40136659/103153838-d3633600-47d6-11eb-874e-7b5f98d8652f.png)
+![system](https://user-images.githubusercontent.com/40136659/103154913-74092400-47de-11eb-848c-a9a63798805b.png)
 
 
 ### 使用方法
