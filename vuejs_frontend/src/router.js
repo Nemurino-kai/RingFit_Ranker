@@ -5,6 +5,7 @@ import Ranking from '@/views/Ranking'
 import MonthlyRanking from '@/views/MonthlyRanking'
 import User from '@/views/User'
 import About from '@/views/About'
+import NotFound from '@/views/NotFound'
 import store from './store.js'
 
 Vue.use(VueRouter)
@@ -38,6 +39,10 @@ const router = new VueRouter({
       path: '/about',
       component: About,
       meta: { title: 'About', desc: 'RingFitRankerについての説明です' }
+    },
+    { path: '*',
+      component: NotFound,
+      meta: { title: 'URL Not Found', desc: 'ページが見つかりません' }
     }
   ]
 })
