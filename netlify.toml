@@ -5,3 +5,5 @@
   # This is where we will look for package.json/.nvmrc/etc.
   # If not set, defaults to the root directory.
   base = "vuejs_frontend/"
+  # Status badge incorrectly shows failing when deploy is auto cancelled.
+  ignore = "/bin/false"
