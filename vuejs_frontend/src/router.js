@@ -5,6 +5,7 @@ import Ranking from '@/views/Ranking'
 import MonthlyRanking from '@/views/MonthlyRanking'
 import User from '@/views/User'
 import About from '@/views/About'
+import Questions from '@/views/Questions'
 import NotFound from '@/views/NotFound'
 import store from './store.js'
 
@@ -39,6 +40,11 @@ const router = new VueRouter({
       path: '/about',
       component: About,
       meta: { title: 'About', desc: 'RingFitRankerについての説明です' }
+    },
+    {
+      path: '/questions',
+      component: Questions,
+      meta: { title: 'Q&A', desc: 'よくある質問に対しての回答です' }
     },
     { path: '*',
       component: NotFound,
