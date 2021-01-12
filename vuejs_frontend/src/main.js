@@ -11,8 +11,10 @@ import App from './App.vue'
 import store from './store.js'
 import axios from 'axios'
 
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
+import './assets/scss/custom.scss'
+
+// 変更
+
 import 'vue-loading-overlay/dist/vue-loading.css'
 
 Vue.use(moment)
