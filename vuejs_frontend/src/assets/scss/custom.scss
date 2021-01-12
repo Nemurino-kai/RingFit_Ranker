@@ -1,0 +1,18 @@
+// 行間を空ける
+$headings-line-height: 1.5 !default;
+$line-height-base: 1.65 !default;
+
+// 段の両端を揃える
+* {
+    text-align: justify;
+}
+
+// 角丸を小さくする
+$border-radius: 0.125rem !default;
+$border-radius-lg: 0.15rem !default;
+$border-radius-sm: 0.1rem !default;
+
+// Include Bootstrap and BootstrapVue SCSS files
+@import '~bootstrap/scss/bootstrap.scss';
+@import '~bootstrap-vue/src/index.scss';
+
