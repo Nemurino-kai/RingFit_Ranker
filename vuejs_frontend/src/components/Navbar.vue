@@ -10,6 +10,7 @@
         <b-nav-item to="/">Ranking</b-nav-item>
         <b-nav-item :to="'/user/' + this.$store.state.userRank.user">User</b-nav-item>
         <b-nav-item to="/about">About</b-nav-item>
+        <b-nav-item to="/questions">Q&A</b-nav-item>
       </b-navbar-nav>
     </b-collapse>
   </b-navbar>
