@@ -46,6 +46,9 @@ def read_cal_by_connectedComponets(image):
     stats = stats[np.argsort(stats[:, 0])] # x座標でソート
     kcal_str =""
 
+    if stats[nlabels - 1][4] < 100:
+        nlabels = nlabels - 1
+
     if (nlabels > 4 or nlabels <= 1):
         raise ValueError(f"ConnectedComponets > 4 or ConnectedComponets <= 1. nlabels is {nlabels}.")
 
