@@ -38,7 +38,7 @@ def api_index():
     print(params)
 
     cur.execute("SELECT id,RANK() OVER(ORDER BY kcal DESC) AS ranking,user_name,kcal,tweeted_time "
-                "FROM (SELECT *, RANK() OVER(PARTITION BY user_screen_name ORDER BY kcal DESC, id) AS rnk FROM Exercise WHERE   date(datetime(tweeted_time,'-4 hours'))==?) tmp "
+                "FROM (SELECT *, RANK() OVER(PARTITION BY user_screen_name ORDER BY kcal DESC, id) AS rnk FROM Exercise WHERE   exercise_day==?) tmp "
                 "WHERE rnk = 1 ORDER BY kcal DESC, tweeted_time ASC;",params)
 
     exercise_data_list = cur.fetchall()
@@ -70,8 +70,8 @@ def api_monthly():
     print(params)
 
     cur.execute("SELECT id,RANK() OVER(ORDER BY SUM(kcal) DESC) AS ranking,user_name,SUM(kcal) AS monthly_kcal,COUNT(user_name) AS days "
-                "FROM (SELECT *, RANK() OVER(PARTITION BY [user_screen_name],[tweeted_date] ORDER BY kcal DESC, id) AS rnk "
-                "FROM (SELECT *, strftime('%Y-%m-%d',datetime(tweeted_time,'-4 hours')) AS tweeted_date FROM Exercise) WHERE strftime('%Y-%m',datetime(tweeted_time,'-4 hours')) == strftime('%Y-%m',?)) tmp "
+                "FROM (SELECT *, RANK() OVER(PARTITION BY [user_screen_name],[exercise_day] ORDER BY kcal DESC, id) AS rnk "
+                "FROM (SELECT * FROM Exercise) WHERE strftime('%Y-%m',datetime(tweeted_time,'-4 hours')) == strftime('%Y-%m',?)) tmp "
                 "WHERE rnk = 1 GROUP BY user_screen_name ORDER BY monthly_kcal DESC, tweeted_time ASC ;",params)
 
     exercise_data_list = cur.fetchall()
@@ -91,8 +91,8 @@ def api_user():
     if user is None: user = ""
     params=(user,)
 
-    cur.execute("WITH NonOverlapTable AS (SELECT *, RANK() OVER(PARTITION BY user_screen_name, date(datetime(tweeted_time,'-4 hours')) ORDER BY kcal DESC, id) AS rnk FROM Exercise)"
-                ",DailyRankedTable AS (SELECT *,RANK() OVER(PARTITION BY date(datetime(tweeted_time,'-4 hours')) ORDER BY kcal DESC) AS daily_rank FROM NonOverlapTable WHERE rnk = 1)"
+    cur.execute("WITH NonOverlapTable AS (SELECT *, RANK() OVER(PARTITION BY user_screen_name, exercise_day ORDER BY kcal DESC, id) AS rnk FROM Exercise)"
+                ",DailyRankedTable AS (SELECT *,RANK() OVER(PARTITION BY exercise_day ORDER BY kcal DESC) AS daily_rank FROM NonOverlapTable WHERE rnk = 1)"
                 "SELECT id,daily_rank,kcal,tweeted_time, strftime('%w', datetime(tweeted_time,'-4 hours')) AS weeknumber FROM DailyRankedTable WHERE rnk = 1 AND user_screen_name==? ORDER BY tweeted_time DESC;",params)
 
     exercise_data_list = cur.fetchall()

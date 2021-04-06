@@ -97,7 +97,7 @@ def reply_ranking(api,item_num=100):
         params = (tweet.user.id,ranking_timestamp)
 
         # user_idからカロリーを抽出
-        cur.execute("SELECT kcal FROM Exercise WHERE user_id == ? AND date(datetime(time_stamp,'-4 hours'))==?",params)
+        cur.execute("SELECT kcal FROM Exercise WHERE user_id == ? AND exercise_day==?",params)
 
 
 def make_ranking_picture(exercise_data_list):
@@ -182,7 +182,7 @@ def tweet_ranking(api):
 
     # フォロワー内のみでTOP10を集計
     cur.execute("SELECT user_name,kcal "
-                "FROM (SELECT *, RANK() OVER(PARTITION BY user_screen_name ORDER BY kcal DESC, tweeted_time ASC) AS rnk FROM Exercise WHERE date(datetime(tweeted_time,'-4 hours')) == ? AND user_screen_name IN (%s)) tmp "
+                "FROM (SELECT *, RANK() OVER(PARTITION BY user_screen_name ORDER BY kcal DESC, tweeted_time ASC) AS rnk FROM Exercise WHERE exercise_day == ? AND user_screen_name IN (%s)) tmp "
                 "WHERE rnk = 1 ORDER BY kcal DESC, tweeted_time ASC  LIMIT 10;"% ("?," * len(follower_names))[:-1],params)
 
 
@@ -238,14 +238,14 @@ def reply_exercise_result(api,cur,exercise_data,status):
     # DBから当日の順位分のデータを抽出し、消費カロリー順でソート
 
     cur.execute("select kcal from Exercise "
-                "WHERE date(datetime(tweeted_time,'-4 hours'))==? ORDER BY kcal DESC ;",params)
+                "WHERE exercise_day==? ORDER BY kcal DESC ;",params)
     exercise_data_list = cur.fetchall()
     print(exercise_data)
 
     # 消費カロリーの順位を計算する
     params = (exercise_data.cal,ranking_datetime)
     cur.execute("select count(*) from Exercise WHERE Exercise.kcal > ? "
-                "AND date(datetime(tweeted_time,'-4 hours'))==?", params)
+                "AND exercise_day==?", params)
     cal_ranking = int(cur.fetchone()[0])
     print(cal_ranking)
 
