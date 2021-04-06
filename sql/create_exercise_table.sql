@@ -7,7 +7,7 @@ CREATE TABLE Exercise (
         user_screen_name TEXT NOT NULL ,
         tweet_id NUMERIC NOT NULL UNIQUE ,
         exercise_day TEXT GENERATED ALWAYS AS (date(datetime(tweeted_time,'-4 hours'))) VIRTUAL ,
-        exercise_month TEXT GENERATED ALWAYS AS (strftime(datetime(tweeted_time,'-4 hours'),'%Y-%m')) VIRTUAL
+        exercise_month TEXT GENERATED ALWAYS AS (strftime('%Y-%m', datetime(tweeted_time,'-4 hours'))) VIRTUAL
         );
 
 CREATE INDEX user_screen_name_index ON Exercise(user_screen_name);
