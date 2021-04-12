@@ -71,7 +71,7 @@ def api_monthly():
 
     cur.execute("SELECT id,RANK() OVER(ORDER BY SUM(kcal) DESC) AS ranking,user_name,SUM(kcal) AS monthly_kcal,COUNT(user_name) AS days "
                 "FROM (SELECT *, RANK() OVER(PARTITION BY [user_screen_name],[exercise_day] ORDER BY kcal DESC, id) AS rnk "
-                "FROM (SELECT * FROM Exercise) WHERE strftime('%Y-%m',datetime(tweeted_time,'-4 hours')) == strftime('%Y-%m',?)) tmp "
+                "FROM (SELECT * FROM Exercise) WHERE exercise_month == strftime('%Y-%m',?)) tmp "
                 "WHERE rnk = 1 GROUP BY user_screen_name ORDER BY monthly_kcal DESC, tweeted_time ASC ;",params)
 
     exercise_data_list = cur.fetchall()
