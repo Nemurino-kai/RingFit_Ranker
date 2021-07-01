@@ -1,0 +1,44 @@
+version: "3"
+services:
+
+  uwsgi:
+    # ビルドするDockerfileのでディレクトリ相対パス
+    build: ./flask_webapp
+    # 指定したパスをコンテナにマウントする。"ホストのパス:コンテナのパス"となる
+    volumes:
+      - ./flask_webapp:/var/www/
+      - ./shared_file:/var/www/shared_file
+    # コンテナ内の環境変数を指定する
+    environment:
+      TZ: "Asia/Tokyo"
+
+  https-portal:
+    image: steveltn/https-portal:1
+    # 解放するポートを指定。"ホスト:コンテナ"のマッピング となる
+    ports:
+      - '80:80'
+      - '443:443'
+    environment:
+      DOMAINS: ${DOMAIN_NAME} -> http://nginx
+      STAGE: ${STAGE}
+      TZ: "Asia/Tokyo"
+
+
+  nginx:
+    build: ./nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      # nginxのログをホストOSの /tmp/nginx_log に出力する
+      - /tmp/nginx_log:/var/log/nginx
+    links:
+      - uwsgi
+    environment:
+      TZ: "Asia/Tokyo"
+
+  twitter_bot:
+    build: ./twitter_bot
+    volumes:
+      - ./twitter_bot:/opt/bot
+      - ./shared_file:/opt/bot/shared_file
+    environment:
+      TZ: "Asia/Tokyo"

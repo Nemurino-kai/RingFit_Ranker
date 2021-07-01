@@ -9,3 +9,5 @@ hist.png
 SQLtest.py
 .idea/
 __pycache__/
+sql/move.sql
+.env
