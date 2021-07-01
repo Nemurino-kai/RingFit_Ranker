@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import smtplib
-import config
+from shared_file import config
 from email.mime.text import MIMEText
 
 def send_mail(title,text):

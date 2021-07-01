@@ -1,6 +1,6 @@
 # coding: utf-8
 from flask import Blueprint,request, jsonify
-import config
+from shared_file import config
 import sqlite3
 import datetime
 from dateutil.relativedelta import relativedelta

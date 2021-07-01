@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import tweepy
 import datetime
-import config
+from shared_file import config
 import urllib
 import info_convert
 import sqlite3

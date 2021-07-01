@@ -3,7 +3,7 @@ from flask import Flask, render_template,request
 from flask_bootstrap import Bootstrap
 from flask_paginate import Pagination, get_page_parameter
 from flask_cors import CORS
-import config
+from shared_file import config
 import sqlite3
 import datetime
 import pandas as pd
