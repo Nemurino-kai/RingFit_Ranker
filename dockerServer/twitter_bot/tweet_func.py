@@ -10,6 +10,7 @@ import utils
 from PIL import Image, ImageDraw, ImageFont
 import random
 import sys
+import os
 
 
 # TwitterのAPI_TOKEN
@@ -23,8 +24,12 @@ TWITTER_ID = config.TWITTER_ID
 # タイムゾーン指定
 JST = datetime.timezone(datetime.timedelta(hours=+9), 'JST')
 
+# カレントディレクトリを実行ファイルのパスに張り替え
+tmp = os.getcwd()
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
 # リプライ用のメッセージを読み込み
-lines = [line.rstrip('\n') for line in open('talking_list.txt',encoding="utf-8")]
+lines = [line.rstrip('\n') for line in open('./talking_list.txt', encoding="utf-8")]
 
 # TwitterAPI認証用関数
 def auth_twitter():

@@ -3,10 +3,14 @@ import cv2
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from matplotlib.colors import LinearSegmentedColormap
+import os
 
 import datetime
 import numpy as np
 
+# カレントディレクトリを実行ファイルのパスに張り替え
+tmp = os.getcwd()
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 THRESHOLD = 0.95
 TEMPLATE = cv2.imread('templates/running.jpg')
