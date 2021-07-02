@@ -37,14 +37,19 @@ dockerServerディレクトリ上で、`docker-compose build`および`docker-co
 dockerServerディレクトリには、.envファイルを以下のように設定し、置いてください。
 
 ```.env
+DOMAIN_NAME=APIアクセス時のドメイン名
+STAGE=HTTPS-PORTALにおけるステージ
+
+TWITTER_ID=RingFitRanker(呟くアカウントのTwitter_ID)
 CONSUMER_KEY=ここに
 CONSUMER_SECRET=Twitterの
 ACCESS_TOKEN=Tokenを
 ACCESS_TOKEN_SECRET=いれる
+
 TO_ADDR=障害発生時の報告メール送信先
 FROM_ADDR=障害発生時の報告メール送信元
 MAIL_PASS=Googleのアプリパスワード
-TWITTER_ID=RingFitRanker(呟くアカウントのTwitter_ID)
+
 DATABASE_DIR=運動記録を保存するデータベースを保存するディレクトリ
 DATABASE_NAME=データベースの名前
 RANKING_FONT=ランキング画像のユーザ名に用いるフォント
