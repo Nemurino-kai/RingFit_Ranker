@@ -1,6 +1,6 @@
 # coding: utf-8
 from flask import Blueprint,request, jsonify
-from shared_file import config
+import os
 import sqlite3
 import datetime
 from dateutil.relativedelta import relativedelta
@@ -21,7 +21,7 @@ def dict_factory(cursor, row):
 def api_index():
 
     day = request.args.get('day')
-    conn = sqlite3.connect(config.DATABASE_NAME)
+    conn = sqlite3.connect(os.environ['DATABASE_NAME'])
     conn.row_factory = dict_factory
     cur = conn.cursor()
 
@@ -53,7 +53,7 @@ def api_index():
 def api_monthly():
 
     month = request.args.get('month')
-    conn = sqlite3.connect(config.DATABASE_NAME)
+    conn = sqlite3.connect(os.environ['DATABASE_NAME'])
     conn.row_factory = dict_factory
     cur = conn.cursor()
 
@@ -85,7 +85,7 @@ def api_monthly():
 @module_api.route('/api/user')
 def api_user():
     user = request.args.get('user')
-    conn = sqlite3.connect(config.DATABASE_NAME)
+    conn = sqlite3.connect(os.environ['DATABASE_NAME'])
     conn.row_factory = dict_factory
     cur = conn.cursor()
     if user is None: user = ""

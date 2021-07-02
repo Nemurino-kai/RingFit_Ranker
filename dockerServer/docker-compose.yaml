@@ -7,8 +7,9 @@ services:
     # 指定したパスをコンテナにマウントする。"ホストのパス:コンテナのパス"となる
     volumes:
       - ./flask_webapp:/var/www/
-      - ./shared_file:/var/www/shared_file
+      - ./${DATABASE_DIR}:/var/www/${DATABASE_DIR}
     # コンテナ内の環境変数を指定する
+    env_file: .env
     environment:
       TZ: "Asia/Tokyo"
 
@@ -39,6 +40,7 @@ services:
     build: ./twitter_bot
     volumes:
       - ./twitter_bot:/opt/bot
-      - ./shared_file:/opt/bot/shared_file
+      - ./${DATABASE_DIR}:/opt/bot/${DATABASE_DIR}
+    env_file: .env
     environment:
       TZ: "Asia/Tokyo"

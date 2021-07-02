@@ -3,7 +3,7 @@ from flask import Flask, render_template,request
 from flask_bootstrap import Bootstrap
 from flask_paginate import Pagination, get_page_parameter
 from flask_cors import CORS
-from shared_file import config
+import os
 import sqlite3
 import datetime
 import pandas as pd
@@ -24,7 +24,7 @@ app.register_blueprint(module_api)
 def index():
 
     day = request.args.get('day')
-    conn = sqlite3.connect(config.DATABASE_NAME)
+    conn = sqlite3.connect(os.environ['DATABASE_NAME'])
     cur = conn.cursor()
 
     now = datetime.datetime.now(JST)
@@ -59,7 +59,7 @@ def about():
 @app.route('/user')
 def user():
     user = request.args.get('user')
-    conn = sqlite3.connect(config.DATABASE_NAME)
+    conn = sqlite3.connect(os.environ['DATABASE_NAME'])
     cur = conn.cursor()
     if user is None: user = ""
     params=(user,)
@@ -80,7 +80,7 @@ def user():
 @app.route('/analytics')
 def analytics():
     day = request.args.get('day')
-    conn = sqlite3.connect(config.DATABASE_NAME)
+    conn = sqlite3.connect(os.environ['DATABASE_NAME'])
     cur = conn.cursor()
 
     if datetime.datetime.now(JST).hour < 4:

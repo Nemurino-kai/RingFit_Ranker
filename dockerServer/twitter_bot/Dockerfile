@@ -19,21 +19,13 @@ COPY requirements.txt ./
 # 依存Pythonライブラリインストール
 RUN pip install --no-cache-dir -r requirements.txt
 
-RUN apt-get update && apt-get install python3-opencv -y && apt-get install cron -y
+RUN apt-get update && apt-get install python3-opencv -y && apt-get install busybox-static -y
 
-
-
-# cronのファイルを追加
-# cronには環境変数のパスが通っていないため、通しておく
-RUN echo 'LD_LIBRARY_PATH=/sqlite/.libs' >> /etc/crontab
-RUN echo 'TZ=Asia/Tokyo' >> /etc/crontab
-RUN echo '0 12 * * * root python /opt/bot/ranking_bot_cron.py' >> /etc/crontab
-RUN echo '*/5 * * * * root python /opt/bot/tweet_bot_cron.py' >> /etc/crontab
+# crontabファイルをコピー
+COPY crontab /var/spool/cron/crontabs/root
 
 # DBが無ければ、作成する（あれば作成しない）
 # dockerのvolumeはbuild中に中身を参照できない。そのため、RUNでなくCMDを用いる。
-CMD bash -c "if [ ! -e /opt/bot/shared_file/result.db ]; then \
+CMD ["bash", "-c", "if [ ! -e /opt/bot/shared_file/result.db ]; then \
         /sqlite/sqlite3 /opt/bot/shared_file/result.db < /opt/bot/sql/create_exercise_table.sql; \
-fi && cron -f"
-
-#CMD ["cron", "-f"]
+fi && busybox crond -f -L /dev/stderr"]

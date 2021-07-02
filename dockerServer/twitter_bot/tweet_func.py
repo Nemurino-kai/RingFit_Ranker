@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import tweepy
 import datetime
-from shared_file import config
 import urllib
 import info_convert
 import sqlite3
@@ -14,12 +13,12 @@ import os
 
 
 # TwitterのAPI_TOKEN
-CK = config.CONSUMER_KEY
-CS = config.CONSUMER_SECRET
-AT = config.ACCESS_TOKEN
-AS = config.ACCESS_TOKEN_SECRET
+CK = os.environ['CONSUMER_KEY']
+CS = os.environ['CONSUMER_SECRET']
+AT = os.environ['ACCESS_TOKEN']
+AS = os.environ['ACCESS_TOKEN_SECRET']
 
-TWITTER_ID = config.TWITTER_ID
+TWITTER_ID = os.environ['TWITTER_ID']
 
 # タイムゾーン指定
 JST = datetime.timezone(datetime.timedelta(hours=+9), 'JST')
@@ -41,7 +40,7 @@ def auth_twitter():
 
 # 運動記録をツイッター上から検索し、データベースに追加する, フォローしてくれている人にはリプライする。
 def search_exercise_data(api, max_number=300,interrupt=True,query='#リングフィットアドベンチャー OR #RingFitAdventure -filter:retweets filter:images -@tos'):
-    conn = sqlite3.connect(config.DATABASE_NAME)
+    conn = sqlite3.connect(os.environ['DATABASE_NAME'])
     cur = conn.cursor()
     # フォローしてくれている人を取得
     follower_id = api.followers_ids()
@@ -93,7 +92,7 @@ def reply_ranking(api,item_num=100):
         # ツイートに順位 が含まれているなら、順位をリプライする
         if not "順位" in tweet.full_text:
             return
-        conn = sqlite3.connect(config.DATABASE_NAME)
+        conn = sqlite3.connect(os.environ['DATABASE_NAME'])
         cur = conn.cursor()
 
         now = datetime.datetime.now(JST)
@@ -115,10 +114,10 @@ def make_ranking_picture(exercise_data_list):
 
     # ユーザ名のフォントサイズとフォント種類
     font_size_ranking = 35
-    font_ranking = ImageFont.truetype(config.RANKING_FONT,font_size_ranking)
+    font_ranking = ImageFont.truetype(os.environ['RANKING_FONT'], font_size_ranking)
     # 消費カロリーのフォントサイズとフォント種類
     font_size_point = 25
-    font_point = ImageFont.truetype(config.KCAL_FONT,font_size_point)
+    font_point = ImageFont.truetype(os.environ['KCAL_FONT'], font_size_point)
 
     # 標準のフォントカラー
     font_color = (200, 0, 0)
@@ -146,7 +145,7 @@ def make_ranking_picture(exercise_data_list):
         # 枠をはみ出す場合は縮小する。
         if w_song > W_song:
             font_size = int(font_size_ranking * W_song / w_song)
-            draw.font = ImageFont.truetype(config.RANKING_FONT,font_size)
+            draw.font = ImageFont.truetype(os.environ['RANKING_FONT'], font_size)
             w_song_n, h_song_n = draw.textsize(user_name)
             draw.text(
                 (85 + w_pos_s, 165 + 97 * h_pos +
@@ -176,7 +175,7 @@ def tweet_ranking(api):
     # idからscreen_nameに変換
     follower_names = [user.screen_name for user in lookup_user_list(follower_ids,api)]
 
-    conn = sqlite3.connect(config.DATABASE_NAME)
+    conn = sqlite3.connect(os.environ['DATABASE_NAME'])
     cur = conn.cursor()
     # DBから前日分の運動結果を抽出し、消費カロリーの多い順でソート
     # 昨日の04:00:00 から 今日の03:59:59まで
@@ -268,7 +267,7 @@ if __name__ == '__main__':
         print("wrong usage")
         exit()
     api = auth_twitter()
-    conn = sqlite3.connect(config.DATABASE_NAME)
+    conn = sqlite3.connect(os.environ['DATABASE_NAME'])
     cur = conn.cursor()
     # フォローしてくれている人を取得
     follower_id = api.followers_ids()
