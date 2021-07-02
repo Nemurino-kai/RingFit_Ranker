@@ -1,0 +1,2 @@
+0 12 * * * python /opt/bot/ranking_bot_cron.py
+*/5 * * * * python /opt/bot/tweet_bot_cron.py
