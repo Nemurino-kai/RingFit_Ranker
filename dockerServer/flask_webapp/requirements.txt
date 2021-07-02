@@ -1,0 +1,7 @@
+Flask
+uwsgi
+flask_bootstrap
+flask_paginate
+flask_cors
+pandas
+python-dateutil

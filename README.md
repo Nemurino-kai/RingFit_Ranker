@@ -33,26 +33,26 @@ https://twitter.com/RingFitRanker で運営中
 
 
 ### 使用方法
-twitter_bot/tweet_bot_cron.py を実行すると、<b>#リングフィットアドベンチャー</b> の画像を検索・集計し、順位をリプライします。<br>
-twitter_bot/ranking_bot_cron.py を実行すると、前日4時から当日3時59分59秒までのランキングベスト10をツイートします。<br>
-cronを用いるなどして、定期的に実行してください。
+dockerServerディレクトリ上で、`docker-compose build`および`docker-compose up`を行うことで、サーバ側の環境が構築されます。
+dockerServerディレクトリには、.envファイルを以下のように設定し、置いてください。
 
-config.pyは以下の通り設定し、flask_webappディレクトリ 及び twitter_botディレクトリ と同じ階層に置いてください。
-
-```python
-CONSUMER_KEY = "ここに"
-CONSUMER_SECRET = "Twitterの"
-ACCESS_TOKEN = "Tokenを"
-ACCESS_TOKEN_SECRET = "いれる"
-TO_ADDR = '障害発生時の報告メール送信先'
-FROM_ADDR = '障害発生時の報告メール送信元'
-MAIL_PASS = 'Googleのアプリパスワード'
-TWITTER_ID = "RingFitRanker(呟くアカウントのTwitter_ID)"
-DATABASE_NAME = "運動記録を保存するデータベースの名前"
-RANKING_FONT = "ランキング画像のユーザ名に用いるフォント"
-KCAL_FONT = "ランキング画像の消費カロリーに用いるフォント"
+```.env
+CONSUMER_KEY=ここに
+CONSUMER_SECRET=Twitterの
+ACCESS_TOKEN=Tokenを
+ACCESS_TOKEN_SECRET=いれる
+TO_ADDR=障害発生時の報告メール送信先
+FROM_ADDR=障害発生時の報告メール送信元
+MAIL_PASS=Googleのアプリパスワード
+TWITTER_ID=RingFitRanker(呟くアカウントのTwitter_ID)
+DATABASE_DIR=運動記録を保存するデータベースを保存するディレクトリ
+DATABASE_NAME=データベースの名前
+RANKING_FONT=ランキング画像のユーザ名に用いるフォント
+KCAL_FONT=ランキング画像の消費カロリーに用いるフォント
 ```
 
-flask_webapp/info_pages.py は、Flaskにより作られたサーバサイドアプリケーションです。消費カロリーの順位などを取得できる、APIが実装されています。
+dockerServer/twitter_bot/tweet_bot_cron.py は、<b>#リングフィットアドベンチャー</b> の画像を検索・集計し、順位をリプライします。cronにより、5分に一回実行されます。<br>
+dockerServer/twitter_bot/ranking_bot_cron.py は、前日4時から当日3時59分59秒までのランキングベスト10をツイートします。cronにより、毎日正午に実行されます。<br>
+dockerServer/flask_webapp/info_pages.py は、Flaskにより作られたサーバサイドアプリケーションです。消費カロリーの順位などを取得できる、APIが実装されています。
 
 vuejs_frontend ディレクトリは、Vue CLIにより作成されたSPAのプロジェクトです。Flaskで作成したAPIにアクセスすることで動作します。

@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
 import smtplib
-import config
+import os
 from email.mime.text import MIMEText
 
 def send_mail(title,text):
-    to_addr = config.TO_ADDR
-    from_addr = config.FROM_ADDR
+    to_addr = os.environ['TO_ADDR']
+    from_addr = os.environ['FROM_ADDR']
     mail_id = from_addr
     # 取得した16桁パスワードを入力する
-    mail_pass = config.MAIL_PASS
+    mail_pass = os.environ['MAIL_PASS']
 
     message = MIMEText(text)
     message['Subject'] = title
