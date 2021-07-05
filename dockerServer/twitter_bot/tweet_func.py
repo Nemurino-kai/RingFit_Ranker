@@ -182,13 +182,20 @@ def tweet_ranking(api):
     now = datetime.datetime.now(JST)
     yesterday = now - datetime.timedelta(days=1)
     yesterday = yesterday.strftime("%Y-%m-%d")
-    params = (yesterday,) +tuple(follower_names)
+
+    # 昨日運動した人の名前を抽出
+    cur.execute("SELECT user_screen_name from Exercise WHERE exercise_day == ?;",(yesterday, ))
+    yesterday_player_list = [item[0] for item in cur.fetchall()]
+    # フォロワー中、昨日運動した人だけを取り出し
+    follow_players = list(set(yesterday_player_list) & set(follower_names))
+
+    params = (yesterday,) +tuple(follow_players)
+
 
     # フォロワー内のみでTOP10を集計
     cur.execute("SELECT user_name,kcal "
                 "FROM (SELECT *, RANK() OVER(PARTITION BY user_screen_name ORDER BY kcal DESC, tweeted_time ASC) AS rnk FROM Exercise WHERE exercise_day == ? AND user_screen_name IN (%s)) tmp "
-                "WHERE rnk = 1 ORDER BY kcal DESC, tweeted_time ASC  LIMIT 10;"% ("?," * len(follower_names))[:-1],params)
-
+                "WHERE rnk = 1 ORDER BY kcal DESC, tweeted_time ASC  LIMIT 10;"% ("?," * len(follow_players))[:-1],params)
 
     exercise_data_list = cur.fetchall()
     make_ranking_picture(exercise_data_list)
