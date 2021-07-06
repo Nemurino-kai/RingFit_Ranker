@@ -4,7 +4,8 @@ import smtplib
 import os
 from email.mime.text import MIMEText
 
-def send_mail(title,text):
+
+def send_mail(title, text):
     to_addr = os.environ['TO_ADDR']
     from_addr = os.environ['FROM_ADDR']
     mail_id = from_addr
@@ -20,6 +21,7 @@ def send_mail(title,text):
     sender.login(mail_id, mail_pass)
     sender.sendmail(from_addr, to_addr, message.as_string())
     sender.quit()
+
 
 if __name__ == '__main__':
     send_mail("test")
