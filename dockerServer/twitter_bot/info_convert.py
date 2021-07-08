@@ -56,6 +56,7 @@ def read_cal_by_connectedComponets(image):
     kcal_str = ""
 
     if stats[nlabels - 1][4] < 100:
+    if stats[nlabels - 1][4] < 200:
         nlabels = nlabels - 1
 
     if (nlabels > 4 or nlabels <= 1):
