@@ -55,7 +55,6 @@ def read_cal_by_connectedComponets(image):
     stats = stats[np.argsort(stats[:, 0])]  # x座標でソート
     kcal_str = ""
 
-    if stats[nlabels - 1][4] < 100:
     if stats[nlabels - 1][4] < 200:
         nlabels = nlabels - 1
 
