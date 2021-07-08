@@ -125,7 +125,7 @@ def image_to_data(imagetype):
     else:
         print(imagetype)
         raise ValueError(
-            "An error has ocurred! Image is not a exercise image.")
+            "An error has occurred! Image is not a exercise image.")
 
     # dummyData
     time = datetime.time(second=0)
