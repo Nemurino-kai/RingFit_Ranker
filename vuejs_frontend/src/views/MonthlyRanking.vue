@@ -12,8 +12,8 @@
     <hr style="margin-top:0.5em;margin-bottom:1em;">
 
     <form class="form-group form-inline">
-      <label>集計月&nbsp;</label>
-      <Datepicker v-model="defaultDate" :disabled-dates="monthlyRank.disabledDates" :minimumView="'month'" :format="'yyyy-MM'"></Datepicker>
+      <label for="aggregated month">集計月&nbsp;</label>
+      <Datepicker v-model="defaultDate" :disabled-dates="monthlyRank.disabledDates" :minimumView="'month'" :format="'yyyy-MM'" id="aggregated month"></Datepicker>
     </form>
     <p class="mt-3" v-if='monthlyRank.errored'>データを読み込めませんでした。ページを更新し直すか、時間をおいて再びアクセスしてください。</p>
   <div class="overflow-auto" v-if="rows != 0">
