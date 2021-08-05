@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
-from tweet_func import *
+import os
+from tweet_func import auth_twitter, search_exercise_data
 import sentry_sdk
 
 
