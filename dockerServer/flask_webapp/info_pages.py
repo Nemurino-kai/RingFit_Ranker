@@ -1,4 +1,6 @@
 # coding: utf-8
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
 from flask import Flask, render_template, request
 from flask_bootstrap import Bootstrap
 from flask_paginate import Pagination, get_page_parameter
@@ -8,6 +10,11 @@ import sqlite3
 import datetime
 import pandas as pd
 from info_api import module_api  # 追加モジュール
+
+sentry_sdk.init(
+    dsn=os.environ['SENTRY_DSN'],
+    integrations=[FlaskIntegration()]
+)
 
 app = Flask(__name__)
 app.config["JSON_AS_ASCII"] = False

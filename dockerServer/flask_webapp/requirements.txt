@@ -5,3 +5,5 @@ flask_paginate
 flask_cors
 pandas
 python-dateutil
+sentry-sdk
+blinker
