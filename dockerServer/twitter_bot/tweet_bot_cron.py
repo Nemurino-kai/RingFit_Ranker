@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
-import utils
-import traceback
 from tweet_func import *
+import sentry_sdk
 
 
 def tweet():
@@ -22,12 +21,5 @@ def tweet():
 
 
 if __name__ == '__main__':
-    try:
-        tweet()
-    except (Exception, tweepy.error.TweepError) as e:
-        traceback.print_exc()
-        utils.send_mail("An error has occurred.",  traceback.format_exc())
-        raise e
-    except:
-        traceback.print_exc()
-        utils.send_mail("An error has occurred.",  traceback.format_exc())
+    sentry_sdk.init(os.environ['SENTRY_DSN'])
+    tweet()

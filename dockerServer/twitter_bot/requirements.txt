@@ -1,3 +1,5 @@
 tweepy
 opencv-python
 matplotlib
+sentry-sdk
+blinker

@@ -4,12 +4,11 @@ import datetime
 import urllib
 import info_convert
 import sqlite3
-import traceback
-import utils
 from PIL import Image, ImageDraw, ImageFont
 import random
 import sys
 import os
+import sentry_sdk
 
 
 # TwitterのAPI_TOKEN
@@ -88,11 +87,8 @@ def search_exercise_data(api, max_number=300, interrupt=True, query='#リング�
                 print(tweet.user.screen_name, " さんにお返事します")
                 reply_exercise_result(api, cur, exercise_data, tweet)
 
-        except tweepy.error.TweepError:
-            traceback.print_exc()
-            utils.send_mail("Tweepy has occurred.", traceback.format_exc())
-        except ValueError:
-            traceback.print_exc()
+        except (ValueError, tweepy.error.TweepError) as err:
+            sentry_sdk.capture_exception(err)
 
 
 # @{TWITTER_ID}へのリプに対し、順位を返信する。
