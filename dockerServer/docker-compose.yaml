@@ -1,12 +1,12 @@
 version: "3"
 services:
 
-  uwsgi:
+  uvicorn:
     # ビルドするDockerfileのでディレクトリ相対パス
-    build: ./flask_webapp
+    build: ./fast_api
     # 指定したパスをコンテナにマウントする。"ホストのパス:コンテナのパス"となる
     volumes:
-      - ./flask_webapp:/var/www/
+      - ./fast_api:/var/www/
       - ./${DATABASE_DIR}:/var/www/${DATABASE_DIR}
     # コンテナ内の環境変数を指定する
     env_file: .env
@@ -34,7 +34,7 @@ services:
       # nginxのログをホストOSの /tmp/nginx_log に出力する
       - /tmp/nginx_log:/var/log/nginx
     links:
-      - uwsgi
+      - uvicorn
     environment:
       TZ: "Asia/Tokyo"
 
