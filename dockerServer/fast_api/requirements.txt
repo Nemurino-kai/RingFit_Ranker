@@ -1,0 +1,5 @@
+fastapi[all]
+uvicorn[standard]
+python-dateutil
+sentry-sdk
+blinker
