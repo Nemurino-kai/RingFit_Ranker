@@ -1,4 +1,5 @@
-from fastapi import Body, FastAPI
+# coding: utf-8
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dateutil.relativedelta import relativedelta
 import uvicorn
@@ -10,7 +11,6 @@ import sentry_sdk
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from dotenv import load_dotenv
 load_dotenv()
-# coding: utf-8
 
 sentry_sdk.init(
     dsn=os.environ['SENTRY_DSN'],
