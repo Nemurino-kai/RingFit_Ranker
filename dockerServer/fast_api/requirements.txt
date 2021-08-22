@@ -3,3 +3,5 @@ uvicorn[standard]
 python-dateutil
 sentry-sdk
 blinker
+SQLAlchemy
+python-dotenv
