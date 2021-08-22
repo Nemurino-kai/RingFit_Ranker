@@ -1,3 +1,4 @@
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql import func
 from sqlalchemy.orm.session import Session
 from sqlalchemy.orm import sessionmaker
@@ -58,7 +59,7 @@ def clear_database():
     for table in reversed(meta.sorted_tables):
         try:
             session.execute(table.delete())
-        except:
+        except SQLAlchemyError:
             pass
     session.commit()
 
