@@ -16,7 +16,7 @@
     "axios": "^0.21.2",
     "bootstrap": "^4.5.2",
     "bootstrap-vue": "^2.17.3",
-    "chart.js": "^2.9.3",
+    "chart.js": "^2.9.4",
     "chartjs-plugin-zoom": "^0.7.7",
     "moment": "^2.29.0",
     "vue": "^2.6.12",
