@@ -29,7 +29,7 @@ https://twitter.com/RingFitRanker で運営中
 
 ## 開発者向けのメッセージ
 ### システム構成図
-![system](https://user-images.githubusercontent.com/40136659/130358034-23cafe1f-d11c-47c7-90f9-3af2cb24b270.png)
+![system](https://user-images.githubusercontent.com/40136659/133085300-4e422e54-c935-49be-aa4e-a2747e321ccd.png)
 
 ### 使用方法
 dockerServerディレクトリ上で、`docker-compose build`および`docker-compose up`を行うことで、サーバ側の環境が構築されます。
