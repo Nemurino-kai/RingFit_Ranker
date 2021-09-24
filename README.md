@@ -55,6 +55,6 @@ KCAL_FONT=ランキング画像の消費カロリーに用いるフォント
 
 dockerServer/twitter_bot/tweet_bot_cron.py は、<b>#リングフィットアドベンチャー</b> の画像を検索・集計し、順位をリプライします。cronにより、5分に一回実行されます。<br>
 dockerServer/twitter_bot/ranking_bot_cron.py は、前日4時から当日3時59分59秒までのランキングベスト10をツイートします。cronにより、毎日正午に実行されます。<br>
-dockerServer/flask_webapp/info_pages.py は、Flaskにより作られたサーバサイドアプリケーションです。消費カロリーの順位などを取得できる、APIが実装されています。
+dockerServer/fast_api/main.py は、FastAPIにより作られたサーバサイドアプリケーションです。消費カロリーの順位などを取得できる、APIが実装されています。
 
-vuejs_frontend ディレクトリは、Vue CLIにより作成されたSPAのプロジェクトです。Flaskで作成したAPIにアクセスすることで動作します。
+vuejs_frontend ディレクトリは、Vue Routerにより作成されたSPAのプロジェクトです。FastAPIで作成したAPIにアクセスすることで動作します。
