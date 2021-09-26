@@ -6,7 +6,7 @@ import uvicorn
 from datetime import datetime, date, timedelta, timezone
 from typing import Optional
 from sql_alchemy.schemes import DailyResponse, MonthlyResponse, UserResponse
-from sql_alchemy.controller import get_daily_ranking, get_monthly_ranking, get_user_results
+from sql_alchemy.controller import get_daily_ranking, get_monthly_ranking, get_user_ranking
 from sql_alchemy.models import get_db, Session
 import os
 import sentry_sdk
@@ -56,7 +56,7 @@ def monthly(session: Session = Depends(get_db),
 
 @app.get('/api/user', response_model=UserResponse)
 def user(user: str, session: Session = Depends(get_db)):
-    user_exercise_data_list = get_user_results(session, user)
+    user_exercise_data_list = get_user_ranking(session, user)
     return UserResponse(user_exercise_data_list=user_exercise_data_list)
 
 
