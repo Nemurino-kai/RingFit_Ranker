@@ -6,10 +6,12 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy import MetaData
 from sqlalchemy import Column, String, DateTime, Integer, Computed, BigInteger
+from contextlib import contextmanager
 import datetime
 import sys
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 sys.path.append('./')
 
@@ -45,7 +47,20 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base(cls=RepresentableBase)
 
 
+@contextmanager
+def session_scope():
+    """FastAPIを介さずDBにアクセスする際、 with session_scope()として使用する。
+    with句で呼び出すことで、session.close()が最後に実行されるようになる。"""
+    session = SessionLocal()
+    try:
+        yield session
+    finally:
+        session.close()
+
+
 def get_db() -> Session:
+    """FastAPIでDBにアクセスする際は、Depends(get_db())を使用する。
+    FastAPIは内部的にcontextmanagerを使用するため、デコレータは不要"""
     db = SessionLocal()
     try:
         yield db
@@ -65,7 +80,6 @@ def clear_database():
 
 
 def create_database():
-    clear_database()
     Base.metadata.create_all(bind=engine)
 
 

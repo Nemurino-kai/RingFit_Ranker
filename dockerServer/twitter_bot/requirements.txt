@@ -3,3 +3,6 @@ opencv-python
 matplotlib
 sentry-sdk
 blinker
+python-dotenv
+SQLAlchemy
+pydantic

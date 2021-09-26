@@ -9,7 +9,11 @@ import random
 import sys
 import os
 import sentry_sdk
-
+from sql_alchemy.models import Exercise, session_scope
+from sql_alchemy.controller import insert_exercise_result, get_one_day_player_list, get_one_day_ranking_of_followers, \
+    get_daily_ranking, delete_exercise_result_by_tweet_id
+from dotenv import load_dotenv
+load_dotenv()
 
 # TwitterのAPI_TOKEN
 CK = os.environ['CONSUMER_KEY']
@@ -30,6 +34,7 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 lines = [line.rstrip('\n') for line in open(
     './talking_list.txt', encoding="utf-8")]
 
+
 # TwitterAPI認証用関数
 
 
@@ -44,8 +49,6 @@ def auth_twitter():
 def search_exercise_data(api, max_number=300, interrupt=True,
                          query='#リングフィットアドベンチャー OR #RingFitAdventure -filter:retweets filter:images -@tos',
                          api_method_name='search_tweets'):
-    conn = sqlite3.connect(os.environ['DATABASE_NAME'])
-    cur = conn.cursor()
     # フォローしてくれている人を取得
     follower_id = api.get_follower_ids()
 
@@ -54,9 +57,11 @@ def search_exercise_data(api, max_number=300, interrupt=True,
     for tweet in tweepy.Cursor(api_func, q=query, tweet_mode="extended").items(max_number):
         print(tweet.id)
         # idが重複していたら、すでにそこまで検索してあるので中断
-        cur.execute(
-            "select count(*) from Exercise where tweet_id == ?", (tweet.id,))
-        if int(cur.fetchone()[0]):
+        with session_scope() as session:
+            same_id_rows = session.query(Exercise).filter(
+                Exercise.tweet_id == tweet.id).all()
+
+        if same_id_rows:
             if interrupt:
                 return
             else:
@@ -76,18 +81,14 @@ def search_exercise_data(api, max_number=300, interrupt=True,
                     datetime.timedelta(days=1)
             print(tweet.created_at)
             print(tweet)
-            params = (exercise_data.cal, tweet.user.name,
-                      tweet.user.screen_name, tweet.id, tweet.created_at)
-            cur.execute(
-                "insert into Exercise (kcal,user_name,user_screen_name,tweet_id,tweeted_time) "
-                "values (?,?,?,?,?) ", params
-            )
-            conn.commit()
-
+            with session_scope() as session:
+                insert_exercise_result(session=session, kcal=exercise_data.cal, user_name=tweet.user.name,
+                                       user_screen_name=tweet.user.screen_name, tweet_id=tweet.id,
+                                       tweeted_time=tweet.created_at)
             # もしフォローしてくれている人なら、順位を呟く
             if tweet.user.id in follower_id:
                 print(tweet.user.screen_name, " さんにお返事します")
-                reply_exercise_result(api, cur, exercise_data, tweet)
+                reply_exercise_result(api, exercise_data, tweet)
 
         except (ValueError, tweepy.TweepyException) as err:
             sentry_sdk.capture_exception(err)
@@ -137,8 +138,8 @@ def make_ranking_picture(exercise_data_list):
 
     # ランキング
     for i, exercise_data in enumerate(exercise_data_list):
-        user_name = exercise_data[0]
-        kcal = f"{exercise_data[1]}kcal"
+        user_name = exercise_data.user_name
+        kcal = f"{exercise_data.kcal}kcal"
 
         # 1位から5位、6位から10位でポジションを変更
         w_pos_s = 15 if i < 5 else 610
@@ -168,24 +169,22 @@ def make_ranking_picture(exercise_data_list):
 
     im.save("ranking_picture.png")
 
+
 # idのリストからユーザ情報のリストを返す関数
-
-
 def lookup_user_list(user_id_list, api):
     full_users = []
     users_count = len(user_id_list)
     try:
-        for i in range((users_count-1)//100 + 1):
+        for i in range((users_count - 1) // 100 + 1):
             full_users.extend(api.lookup_users(
-                user_ids=user_id_list[i*100:min((i+1)*100, users_count)]))
+                user_id=user_id_list[i * 100:min((i + 1) * 100, users_count)]))
         return full_users
     except tweepy.TweepyException as err:
         sentry_sdk.capture_exception(err)
         print('Something went wrong, quitting...')
 
+
 # 運動記録のランキングをツイートする
-
-
 def tweet_ranking(api):
     # フォローしてくれている人を取得
     follower_ids = api.get_follower_ids()
@@ -194,35 +193,26 @@ def tweet_ranking(api):
     follower_names = [
         user.screen_name for user in lookup_user_list(follower_ids, api)]
 
-    conn = sqlite3.connect(os.environ['DATABASE_NAME'])
-    cur = conn.cursor()
     # DBから前日分の運動結果を抽出し、消費カロリーの多い順でソート
     # 昨日の04:00:00 から 今日の03:59:59まで
     now = datetime.datetime.now(JST)
-    yesterday = now - datetime.timedelta(days=1)
-    yesterday = yesterday.strftime("%Y-%m-%d")
+    yesterday = (now - datetime.timedelta(days=1)).date()
 
-    # 昨日運動した人の名前を抽出
-    cur.execute(
-        "SELECT user_screen_name from Exercise WHERE exercise_day == ?;", (yesterday, ))
-    yesterday_player_list = [item[0] for item in cur.fetchall()]
+    with session_scope() as session:
+        yesterday_player_list = get_one_day_player_list(session, yesterday)
     # フォロワー中、昨日運動した人だけを取り出し
     follow_players = list(set(yesterday_player_list) & set(follower_names))
 
-    params = (yesterday,) + tuple(follow_players)
-
-    # フォロワー内のみでTOP10を集計
-    cur.execute("SELECT user_name,kcal "
-                "FROM (SELECT *, RANK() OVER(PARTITION BY user_screen_name ORDER BY kcal DESC, tweeted_time ASC) AS rnk FROM Exercise WHERE exercise_day == ? AND user_screen_name IN (%s)) tmp "
-                "WHERE rnk = 1 ORDER BY kcal DESC, tweeted_time ASC  LIMIT 10;" % ("?," * len(follow_players))[:-1], params)
-
-    exercise_data_list = cur.fetchall()
+    with session_scope() as session:
+        exercise_data_list = get_one_day_ranking_of_followers(
+            session, yesterday, follow_players)
+    print(exercise_data_list)
     make_ranking_picture(exercise_data_list)
+
     tweet = "今日のランキング発表！\n"
-    for i, exercise_data in enumerate(exercise_data_list):
-        tweet += f"{i + 1}位 {exercise_data[0]} {exercise_data[1]}kcal\n"
-        if i + 1 >= 3:
-            break
+    for i, exercise_data in enumerate(exercise_data_list[:3]):
+        tweet += f"{i + 1}位 {exercise_data.user_name} {exercise_data.kcal}kcal\n"
+
     print(tweet)
     api.update_status_with_media(
         status=tweet, filename='./ranking_picture.png')
@@ -257,38 +247,27 @@ def get_reply_message():
     return random.choice(lines)
 
 
-def reply_exercise_result(api, cur, exercise_data, status):
-
-    ranking_datetime = status.created_at - datetime.timedelta(hours=4)
-    ranking_datetime = ranking_datetime.strftime("%Y-%m-%d")
-    today_datetime = datetime.datetime.now(JST).strftime("%Y-%m-%d")
+def reply_exercise_result(api, exercise_data, status):
+    ranking_datetime = (status.created_at - datetime.timedelta(hours=4)).date()
+    today_datetime = datetime.datetime.now(JST).date()
     if ranking_datetime == today_datetime:
         prefix = "今日"
     else:
-        prefix = ranking_datetime
+        prefix = ranking_datetime.strftime("%Y-%m-%d")
 
-    params = (ranking_datetime,)
-
-    # DBから当日の順位分のデータを抽出し、消費カロリー順でソート
-
-    cur.execute("select kcal from Exercise "
-                "WHERE exercise_day==? ORDER BY kcal DESC ;", params)
-    exercise_data_list = cur.fetchall()
-    print(exercise_data)
+    with session_scope() as session:
+        exercise_data_list = get_daily_ranking(session, ranking_datetime)
 
     # 消費カロリーの順位を計算する
-    params = (exercise_data.cal, ranking_datetime)
-    cur.execute("select count(*) from Exercise WHERE Exercise.kcal > ? "
-                "AND exercise_day==?", params)
-    cal_ranking = int(cur.fetchone()[0])
+    cal_ranking = sum(e.kcal > exercise_data.cal for e in exercise_data_list)
     print(cal_ranking)
 
     tweet = "@" + str(status.user.screen_name) + '\n'
     tweet += str(exercise_data.cal) + "kcal消費 " + get_reply_message() + "\n"
     tweet += f"{prefix}の順位 {cal_ranking + 1}位/{len(exercise_data_list)}人中"
-    print(exercise_data_list)
-    info_convert.datalist_to_histogram(info_convert.convert_datatuple_to_list(exercise_data_list),
-                                       cal_ranking)
+
+    info_convert.datalist_to_histogram(
+        [e.kcal for e in exercise_data_list], cal_ranking)
     api.update_status_with_media(
         status=tweet, in_reply_to_status_id=status.id, filename='./hist.png')
 
@@ -299,25 +278,30 @@ if __name__ == '__main__':
         print("wrong usage")
         exit()
     api = auth_twitter()
-    conn = sqlite3.connect(os.environ['DATABASE_NAME'])
-    cur = conn.cursor()
+
     # フォローしてくれている人を取得
     follower_id = api.followers_ids()
     tweet = api.get_status(int(args[1]), tweet_mode='extended')
 
     # idが重複していたら、消去してよいか確認
-    cur.execute("select count(*) from Exercise where tweet_id == ?", (tweet.id,))
-    if int(cur.fetchone()[0]):
+    with session_scope() as session:
+        same_id_rows = session.query(Exercise).filter(
+            Exercise.tweet_id == tweet.id).all()
+    if same_id_rows:
         delete_flag = input(
             "Data is already exist in DB. Do you want to delete? (y or n):")
         if delete_flag != "y":
             exit()
         else:
-            cur.execute(
-                "delete from Exercise where tweet_id == ?", (tweet.id,))
+            with session_scope() as session:
+                delete_exercise_result_by_tweet_id(session, tweet.id)
 
     # imgがリングフィットのものでなければ、手動でkcalを入力
-    image_type = fetch_image(tweet)
+    try:
+        image_type = fetch_image(tweet)
+    except:
+        image_type = None
+
     if image_type is None:
         execute_flag = input(
             "Image type is None. Do you continue yet? (y or n):")
@@ -340,17 +324,15 @@ if __name__ == '__main__':
     # もし"#昨日の分"と書かれていたら、日付を昨日に変える
     if '#昨日の分' in tweet.full_text:
         tweet.created_at = tweet.created_at - datetime.timedelta(days=1)
-    params = (exercise_data.cal, tweet.user.name,
-              tweet.user.screen_name, tweet.id, tweet.created_at)
-    cur.execute(
-        "insert into Exercise (kcal,user_name,user_screen_name,tweet_id,tweeted_time) "
-        "values (?,?,?,?,?) ", params
-    )
-    conn.commit()
+
+    with session_scope() as session:
+        insert_exercise_result(session, kcal=exercise_data.cal, user_name=tweet.user.name,
+                               user_screen_name=tweet.user.screen_name, tweet_id=tweet.id,
+                               tweeted_time=tweet.created_at)
 
     # もしフォローしてくれている人なら、順位を呟く
     if tweet.user.id in follower_id:
         reply_flag = input(f"{tweet.user.screen_name}さんにお返事しますか？(y or n):")
         if reply_flag != "y":
             exit()
-        reply_exercise_result(api, cur, exercise_data, tweet)
+        reply_exercise_result(api, exercise_data, tweet)

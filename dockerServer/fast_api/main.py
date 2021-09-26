@@ -5,9 +5,9 @@ from dateutil.relativedelta import relativedelta
 import uvicorn
 from datetime import datetime, date, timedelta, timezone
 from typing import Optional
-from schemes import DailyResponse, MonthlyResponse, UserResponse
-from controller import get_daily_ranking, get_monthly_ranking, get_user_results
-from models import get_db, Session
+from sql_alchemy.schemes import DailyResponse, MonthlyResponse, UserResponse
+from sql_alchemy.controller import get_daily_ranking, get_monthly_ranking, get_user_results
+from sql_alchemy.models import get_db, Session
 import os
 import sentry_sdk
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
