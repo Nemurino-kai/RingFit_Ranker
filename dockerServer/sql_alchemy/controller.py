@@ -68,7 +68,7 @@ def get_monthly_ranking(session: Session, month: str) -> List[MonthlyExerciseDat
     return format_exercise
 
 
-def get_user_results(session: Session, user_screen_name: str) -> List[UserExerciseData]:
+def get_user_ranking(session: Session, user_screen_name: str) -> List[UserExerciseData]:
     individual_ranked = session.query(Exercise, func.rank().over(
         order_by=and_(Exercise.kcal.desc(), Exercise.id),
         partition_by=and_(Exercise.exercise_day, Exercise.user_screen_name)
