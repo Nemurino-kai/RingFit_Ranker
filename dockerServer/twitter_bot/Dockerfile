@@ -28,6 +28,4 @@ COPY crontab /var/spool/cron/crontabs/root
 
 # DBが無ければ、作成する（あれば作成しない）
 # dockerのvolumeはbuild中に中身を参照できない。そのため、RUNでなくCMDを用いる。
-CMD ["bash", "-c", "if [ ! -e /opt/bot/shared_file/result.db ]; then \
-        /sqlite/sqlite3 /opt/bot/shared_file/result.db < /opt/bot/sql/create_exercise_table.sql; \
-fi && busybox crond -f -L /dev/stderr"]
+CMD ["bash", "-c", "python ./sql_alchemy/models.py && busybox crond -f -L /dev/stderr"]
