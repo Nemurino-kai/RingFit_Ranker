@@ -102,8 +102,10 @@ def insert_exercise_result(session: Session, kcal: int, user_name: str, user_scr
 
 
 def get_one_day_player_list(session: Session, day: date) -> List[str]:
-    one_day_player_list = session.query(
-        Exercise.user_screen_name).filter(Exercise.exercise_day == day).all()
+    one_day_exercise_list = session.query(
+        Exercise).filter(Exercise.exercise_day == day).all()
+    one_day_player_list = [e.user_screen_name
+                           for e in one_day_exercise_list]
     return one_day_player_list
 
 
