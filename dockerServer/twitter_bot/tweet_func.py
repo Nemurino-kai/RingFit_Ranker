@@ -41,11 +41,13 @@ def auth_twitter():
 
 
 # 運動記録をツイッター上から検索し、データベースに追加する, フォローしてくれている人にはリプライする。
-def search_exercise_data(api, max_number=300, interrupt=True, query='#リングフィットアドベンチャー OR #RingFitAdventure -filter:retweets filter:images -@tos', api_method_name='search'):
+def search_exercise_data(api, max_number=300, interrupt=True,
+                         query='#リングフィットアドベンチャー OR #RingFitAdventure -filter:retweets filter:images -@tos',
+                         api_method_name='search_tweets'):
     conn = sqlite3.connect(os.environ['DATABASE_NAME'])
     cur = conn.cursor()
     # フォローしてくれている人を取得
-    follower_id = api.followers_ids()
+    follower_id = api.get_follower_ids()
 
     api_func = getattr(api, api_method_name)
 
@@ -87,14 +89,14 @@ def search_exercise_data(api, max_number=300, interrupt=True, query='#リング�
                 print(tweet.user.screen_name, " さんにお返事します")
                 reply_exercise_result(api, cur, exercise_data, tweet)
 
-        except (ValueError, tweepy.error.TweepError) as err:
+        except (ValueError, tweepy.TweepyException) as err:
             sentry_sdk.capture_exception(err)
 
 
 # @{TWITTER_ID}へのリプに対し、順位を返信する。
 # TODO:開発中/まだ使えません
 def reply_ranking(api, item_num=100):
-    for tweet in tweepy.Cursor(api.search, q=f'@{TWITTER_ID}', tweet_mode="extended").items(item_num):
+    for tweet in tweepy.Cursor(api.search_tweets, q=f'@{TWITTER_ID}', tweet_mode="extended").items(item_num):
         print(tweet.full_text)
         # ツイートに順位 が含まれているなら、順位をリプライする
         if not "順位" in tweet.full_text:
@@ -177,7 +179,8 @@ def lookup_user_list(user_id_list, api):
             full_users.extend(api.lookup_users(
                 user_ids=user_id_list[i*100:min((i+1)*100, users_count)]))
         return full_users
-    except tweepy.TweepError:
+    except tweepy.TweepyException as err:
+        sentry_sdk.capture_exception(err)
         print('Something went wrong, quitting...')
 
 # 運動記録のランキングをツイートする
@@ -185,7 +188,7 @@ def lookup_user_list(user_id_list, api):
 
 def tweet_ranking(api):
     # フォローしてくれている人を取得
-    follower_ids = api.followers_ids()
+    follower_ids = api.get_follower_ids()
     print(follower_ids)
     # idからscreen_nameに変換
     follower_names = [
@@ -221,7 +224,8 @@ def tweet_ranking(api):
         if i + 1 >= 3:
             break
     print(tweet)
-    api.update_with_media(status=tweet, filename='./ranking_picture.png')
+    api.update_status_with_media(
+        status=tweet, filename='./ranking_picture.png')
 
 
 # 運動結果の画像を取得出来たらimagetype,できなかったらNoneを返す
@@ -285,7 +289,7 @@ def reply_exercise_result(api, cur, exercise_data, status):
     print(exercise_data_list)
     info_convert.datalist_to_histogram(info_convert.convert_datatuple_to_list(exercise_data_list),
                                        cal_ranking)
-    api.update_with_media(
+    api.update_status_with_media(
         status=tweet, in_reply_to_status_id=status.id, filename='./hist.png')
 
 
