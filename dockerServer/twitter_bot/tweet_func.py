@@ -297,10 +297,7 @@ if __name__ == '__main__':
                 delete_exercise_result_by_tweet_id(session, tweet.id)
 
     # imgがリングフィットのものでなければ、手動でkcalを入力
-    try:
-        image_type = fetch_image(tweet)
-    except:
-        image_type = None
+    image_type = fetch_image(tweet)
 
     if image_type is None:
         execute_flag = input(
