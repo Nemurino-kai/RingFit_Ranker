@@ -1,12 +1,13 @@
+import numpy as np
+import datetime
+import os
+from matplotlib.colors import LinearSegmentedColormap
 from enum import Enum, auto, unique
 import cv2
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-from matplotlib.colors import LinearSegmentedColormap
-import os
+from matplotlib import rcParams
 
-import datetime
-import numpy as np
 
 # カレントディレクトリを実行ファイルのパスに張り替え
 tmp = os.getcwd()
@@ -139,26 +140,34 @@ def convert_datalist_to_timelist(exercise_data_list):
             exercise_data_list]
 
 
-def datalist_to_histogram(exercise_list, ranking):
+def datalist_to_histogram(exercise_list, ranking, title, color_map=['dodgerblue', 'darkturquoise', 'aqua', 'cyan'],
+                          face_color='tomato', image_name='hist.png'):
+    # matplotlib に日本語フォントを設定
+    rcParams['font.family'] = 'sans-serif'
+    rcParams['font.sans-serif'] = ['Hiragino Maru Gothic Pro', 'Yu Gothic',
+                                   'Meirio', 'Takao', 'IPAexGothic', 'IPAPGothic', 'Noto Sans CJK JP']
+
     plt.figure()
-    n, bins, patches = plt.hist(exercise_list, color='darkturquoise',
+    n, bins, patches = plt.hist(exercise_list,
                                 ec='black', bins=HISTGRAM_BINS, range=(0, max(exercise_list)))
     print(n, bins)
+    print(ranking)
     print(exercise_list[ranking])
     print("xは", np.where(exercise_list[ranking] >= bins)[0][-1])
     x = np.where(exercise_list[ranking] >= bins)[0][-1]
     if x == HISTGRAM_BINS:
         x = x - 1
 
-    cm = generate_cmap(['dodgerblue', 'darkturquoise', 'aqua', 'cyan'])
+    cm = generate_cmap(color_map)
     for i in range(HISTGRAM_BINS):
         patches[i].set_facecolor(plt.get_cmap(cm)(
             (bins[i] / bins[HISTGRAM_BINS])*1))
     if x == HISTGRAM_BINS:
         x = x-1
-    patches[x].set_facecolor('tomato')
+    patches[x].set_facecolor(face_color)
 
     # y軸を整数にする
+    plt.title(title)
     plt.gca().get_yaxis().set_major_locator(ticker.MaxNLocator(integer=True))
-    plt.savefig('hist.png')  # ヒストグラムを保存
+    plt.savefig(image_name, bbox_inches='tight')  # ヒストグラムを保存
     plt.close()

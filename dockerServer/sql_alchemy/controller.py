@@ -93,6 +93,16 @@ def get_user_ranking(session: Session, user_screen_name: str) -> List[UserExerci
     return format_exercise
 
 
+def get_user_kcal_list(session: Session, user_screen_name: str) -> List[int]:
+
+    user_results = session.query(
+        Exercise).filter(Exercise.user_screen_name == user_screen_name).all()
+
+    kcal_list = sorted([r.kcal for r in user_results], reverse=True)
+
+    return kcal_list
+
+
 def insert_exercise_result(session: Session, kcal: int, user_name: str, user_screen_name: str,
                            tweet_id: int, tweeted_time: datetime):
     session.add(Exercise(kcal=kcal,

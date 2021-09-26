@@ -20,6 +20,8 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 RUN apt-get update && apt-get install python3-opencv -y && apt-get install busybox-static -y
+# 日本語フォントのインストール
+RUN apt-get install fonts-noto-cjk
 
 # crontabファイルをコピー
 COPY crontab /var/spool/cron/crontabs/root

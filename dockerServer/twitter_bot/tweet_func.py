@@ -11,8 +11,9 @@ import os
 import sentry_sdk
 from sql_alchemy.models import Exercise, session_scope
 from sql_alchemy.controller import insert_exercise_result, get_one_day_player_list, get_one_day_ranking_of_followers, \
-    get_daily_ranking, delete_exercise_result_by_tweet_id
+    get_daily_ranking, delete_exercise_result_by_tweet_id, get_user_kcal_list
 from dotenv import load_dotenv
+
 load_dotenv()
 
 # TwitterのAPI_TOKEN
@@ -249,27 +250,50 @@ def get_reply_message():
 
 def reply_exercise_result(api, exercise_data, status):
     ranking_datetime = (status.created_at - datetime.timedelta(hours=4)).date()
+    ranking_date = ranking_datetime.strftime("%Y/%m/%d")
     today_datetime = datetime.datetime.now(JST).date()
     if ranking_datetime == today_datetime:
         prefix = "今日"
     else:
-        prefix = ranking_datetime.strftime("%Y-%m-%d")
+        prefix = ranking_date
 
     with session_scope() as session:
-        exercise_data_list = get_daily_ranking(session, ranking_datetime)
+        daily_exercise_kcal_list = [
+            e.kcal for e in get_daily_ranking(session, ranking_datetime)]
+        user_kcal_list = get_user_kcal_list(
+            session, status.user.screen_name)
 
     # 消費カロリーの順位を計算する
-    cal_ranking = sum(e.kcal > exercise_data.cal for e in exercise_data_list)
-    print(cal_ranking)
+    daily_cal_ranking = sum(
+        kcal > exercise_data.cal for kcal in daily_exercise_kcal_list)
+    user_kcal_ranking = sum(
+        kcal > exercise_data.cal for kcal in user_kcal_list)
 
-    tweet = "@" + str(status.user.screen_name) + '\n'
-    tweet += str(exercise_data.cal) + "kcal消費 " + get_reply_message() + "\n"
-    tweet += f"{prefix}の順位 {cal_ranking + 1}位/{len(exercise_data_list)}人中"
+    # tweet文を作成
+    tweet = f"@{status.user.screen_name}\n"
+    tweet += f"{exercise_data.cal}kcal消費 {get_reply_message()}\n"
+    tweet += f"{prefix}の順位 {daily_cal_ranking + 1}位/{len(daily_exercise_kcal_list)}人中\n"
+    tweet += f"ユーザ別ランキング {user_kcal_ranking + 1}位/{len(user_kcal_list)}回中"
+    if user_kcal_ranking == 0:
+        tweet += " 【自己ベスト！】"
 
+    # グラフを生成
+    info_convert.datalist_to_histogram(daily_exercise_kcal_list, daily_cal_ranking,
+                                       title=f'{ranking_date} の順位',
+                                       image_name='hist_ranking.png')
     info_convert.datalist_to_histogram(
-        [e.kcal for e in exercise_data_list], cal_ranking)
-    api.update_status_with_media(
-        status=tweet, in_reply_to_status_id=status.id, filename='./hist.png')
+        user_kcal_list, user_kcal_ranking, title=f'{ranking_date} のユーザ別ランキング', color_map=[
+            'darkgreen', 'forestgreen', 'seagreen'],
+        face_color='yellow', image_name='hist_individual.png')
+    # errorを拾わないっぽい？
+
+    # 画像をアップロード
+    media_ids = [api.media_upload(f).media_id_string for f in [
+        './hist_ranking.png', './hist_individual.png']]
+
+    # tweetを呟く
+    api.update_status(
+        status=tweet, in_reply_to_status_id=status.id, media_ids=media_ids)
 
 
 if __name__ == '__main__':
@@ -280,7 +304,7 @@ if __name__ == '__main__':
     api = auth_twitter()
 
     # フォローしてくれている人を取得
-    follower_id = api.followers_ids()
+    follower_id = api.get_follower_ids()
     tweet = api.get_status(int(args[1]), tweet_mode='extended')
 
     # idが重複していたら、消去してよいか確認
