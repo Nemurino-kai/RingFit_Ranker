@@ -139,10 +139,6 @@ def convert_datalist_to_timelist(exercise_data_list):
             exercise_data_list]
 
 
-def convert_datatuple_to_list(exercise_data_list):
-    return [e[0] for e in exercise_data_list]
-
-
 def datalist_to_histogram(exercise_list, ranking):
     plt.figure()
     n, bins, patches = plt.hist(exercise_list, color='darkturquoise',

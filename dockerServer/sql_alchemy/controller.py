@@ -1,14 +1,14 @@
 from typing import List
 from sqlalchemy import func
 from sqlalchemy.orm import Session
-from models import Exercise
-from schemes import DailyExerciseData, MonthlyExerciseData, UserExerciseData
+from sqlalchemy.orm.exc import NoResultFound
+from .models import Exercise
+from .schemes import DailyExerciseData, MonthlyExerciseData, UserExerciseData
 from datetime import datetime, date
 from sqlalchemy import and_
 
 
 def get_daily_ranking(session: Session, day: date) -> List[DailyExerciseData]:
-
     one_day_exercise = session.query(Exercise).filter(
         Exercise.exercise_day == day).subquery()
 
@@ -58,7 +58,8 @@ def get_monthly_ranking(session: Session, month: str) -> List[MonthlyExerciseDat
         order_by=func.sum(individual_best.c.kcal).desc()
     ).label('ranking'),
         func.sum(individual_best.c.kcal).label('monthly_kcal'),
-        func.count(individual_best.c.user_screen_name).label('days')).group_by(individual_best.c.user_screen_name).all()
+        func.count(individual_best.c.user_screen_name).label('days')).group_by(
+        individual_best.c.user_screen_name).all()
 
     format_exercise = [MonthlyExerciseData(
         ranking=r.ranking, user_name=r.user_name, monthly_kcal=r.monthly_kcal, days=r.days)
@@ -68,7 +69,6 @@ def get_monthly_ranking(session: Session, month: str) -> List[MonthlyExerciseDat
 
 
 def get_user_results(session: Session, user_screen_name: str) -> List[UserExerciseData]:
-
     individual_ranked = session.query(Exercise, func.rank().over(
         order_by=and_(Exercise.kcal.desc(), Exercise.id),
         partition_by=and_(Exercise.exercise_day, Exercise.user_screen_name)
@@ -83,7 +83,7 @@ def get_user_results(session: Session, user_screen_name: str) -> List[UserExerci
     ).label('daily_rank')).filter(Exercise.id == individual_best.c.id).subquery()
 
     user_results = session.query(
-        daily_ranked_table).filter(Exercise.user_screen_name == user_screen_name)\
+        daily_ranked_table).filter(Exercise.user_screen_name == user_screen_name) \
         .filter(Exercise.id == daily_ranked_table.c.id).all()
 
     format_exercise = [UserExerciseData(
@@ -91,3 +91,44 @@ def get_user_results(session: Session, user_screen_name: str) -> List[UserExerci
         weeknumber=datetime.strptime(r.exercise_day, '%Y-%m-%d').weekday()) for r in user_results]
 
     return format_exercise
+
+
+def insert_exercise_result(session: Session, kcal: int, user_name: str, user_screen_name: str,
+                           tweet_id: int, tweeted_time: datetime):
+    session.add(Exercise(kcal=kcal,
+                         user_name=user_name, user_screen_name=user_screen_name, tweet_id=tweet_id,
+                         tweeted_time=tweeted_time))
+    session.commit()
+
+
+def get_one_day_player_list(session: Session, day: date) -> List[str]:
+    one_day_player_list = session.query(
+        Exercise.user_screen_name).filter(Exercise.exercise_day == day).all()
+    return one_day_player_list
+
+
+def get_one_day_ranking_of_followers(session: Session, day: date, follow_players: List[str], limit: int = 10) \
+        -> List[Exercise]:
+    one_day_results_of_followers = session.query(
+        Exercise).filter(Exercise.exercise_day == day).filter(Exercise.user_screen_name.in_(follow_players)).subquery()
+
+    individual_ranked = session.query(one_day_results_of_followers, func.rank().over(
+        order_by=and_(Exercise.kcal.desc(), Exercise.tweeted_time),
+        partition_by=Exercise.user_screen_name
+    ).label('rnk')).filter(Exercise.id == one_day_results_of_followers.c.id).subquery()
+
+    individual_best = session.query(
+        individual_ranked).filter(individual_ranked.c.rnk == 1).subquery()
+
+    limited_results = session.query(
+        individual_best).order_by(individual_best.c.kcal.desc(), individual_best.c.tweeted_time).limit(limit).all()
+
+    return limited_results
+
+
+def delete_exercise_result_by_tweet_id(session: Session, tweet_id: int):
+    delete_column = session.query(Exercise).filter(
+        Exercise.tweet_id == tweet_id).delete()
+    if not delete_column:
+        raise NoResultFound
+    session.commit()

@@ -8,6 +8,7 @@ services:
     volumes:
       - ./fast_api:/var/www/
       - ./${DATABASE_DIR}:/var/www/${DATABASE_DIR}
+      - ./sql_alchemy:/var/www/sql_alchemy
     # コンテナ内の環境変数を指定する
     env_file: .env
     environment:
@@ -43,6 +44,7 @@ services:
     volumes:
       - ./twitter_bot:/opt/bot
       - ./${DATABASE_DIR}:/opt/bot/${DATABASE_DIR}
+      - ./sql_alchemy:/opt/bot/sql_alchemy
     env_file: .env
     environment:
       TZ: "Asia/Tokyo"
