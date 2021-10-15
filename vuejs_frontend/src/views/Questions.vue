@@ -64,7 +64,8 @@ Switchから直接投稿すれば、正しく読み取れるはずですが、�
 </template>
 
 <style type="text/css">
-  .cp_qa *, .cp_qa *:after, .cp_qa *:before {
+/* https://copypet.jp/codedescription/960/ より転載 */
+.cp_qa *, .cp_qa *:after, .cp_qa *:before {
     -webkit-box-sizing: border-box;
             box-sizing: border-box;
   }
