@@ -273,7 +273,7 @@ def reply_exercise_result(api, exercise_data, status):
     tweet = f"@{status.user.screen_name}\n"
     tweet += f"{exercise_data.cal}kcal消費 {get_reply_message()}\n"
     tweet += f"{prefix}の順位 {daily_cal_ranking + 1}位/{len(daily_exercise_kcal_list)}人中\n"
-    tweet += f"ユーザ別ランキング {user_kcal_ranking + 1}位/{len(user_kcal_list)}回中"
+    tweet += f"自己ランキング {user_kcal_ranking + 1}位/{len(user_kcal_list)}回中"
     if user_kcal_ranking == 0:
         tweet += " 【自己ベスト！】"
 
@@ -282,7 +282,7 @@ def reply_exercise_result(api, exercise_data, status):
                                        title=f'{ranking_date} の順位',
                                        image_name='hist_ranking.png')
     info_convert.datalist_to_histogram(
-        user_kcal_list, user_kcal_ranking, title=f'{ranking_date} のユーザ別ランキング', color_map=[
+        user_kcal_list, user_kcal_ranking, title=f'{ranking_date} の自己ランキング', color_map=[
             'darkgreen', 'forestgreen', 'seagreen'],
         face_color='yellow', image_name='hist_individual.png')
     # errorを拾わないっぽい？
